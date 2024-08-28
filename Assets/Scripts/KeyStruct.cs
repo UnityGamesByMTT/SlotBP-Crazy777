@@ -22,4 +22,19 @@ public class KeyStruct
     internal string m_text_any_bar = "AnyBar";
     internal string m_text_any = "Any";
     #endregion
+
+    #region ANIMATED_SPRITES_LIST_KEY
+    internal string m_anim_slot_combo7 = "7";
+    internal string m_anim_slot_combo77 = "77";
+    internal string m_anim_slot_combo777 = "777";
+    internal string m_anim_slot_bar = "Bar";
+    internal string m_anim_slot_bar_bar = "BarBar";
+
+    internal string m_anim_bonus_dollar = "Dollar";
+    internal string m_anim_bonus_dollar2 = "Dollar2";
+    internal string m_anim_bonus_2X = "2X";
+    internal string m_anim_bonus_5X = "5X";
+    internal string m_anim_bonus_10X = "10X";
+    internal string m_anim_bonus_respin = "Respin";
+    #endregion
 }

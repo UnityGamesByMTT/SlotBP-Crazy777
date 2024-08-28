@@ -53,7 +53,7 @@ public class SocketIOManager : MonoBehaviour
     private void Start()
     {
         SetInit = false;
-        OpenSocket();
+        //OpenSocket();
 
         //Debug.unityLogger.logEnabled = false;
     }
