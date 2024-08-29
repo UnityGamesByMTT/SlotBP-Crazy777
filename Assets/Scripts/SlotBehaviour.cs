@@ -23,6 +23,10 @@ public class SlotBehaviour : MonoBehaviour
     [SerializeField]
     private UIManager m_UIManager;
 
+    [Header("Game Manager")]
+    [SerializeField]
+    private GameManager m_GameManager;
+
     [Header("Key")]
     private KeyStruct m_Key;
 
@@ -92,7 +96,7 @@ public class SlotBehaviour : MonoBehaviour
     [SerializeField]
     private int SpaceFactor = 0;
     [SerializeField]
-    int verticalVisibility = 3;
+    private int verticalVisibility = 3;
     #endregion
 
     #region Coroutines
@@ -103,6 +107,18 @@ public class SlotBehaviour : MonoBehaviour
 
     #endregion
 
+    [SerializeField]
+    private bool m_Bonus_Found = false;
+    [SerializeField]
+    private float m_Speed_Control = 0.2f;
+
+    private List<ImageAnimation> m_imageAnimations = new List<ImageAnimation>();
+
+    private void OnEnable()
+    {
+        InitiateButtons();
+    }
+
     private void Awake()
     {
         m_Key = new KeyStruct();
@@ -110,24 +126,16 @@ public class SlotBehaviour : MonoBehaviour
 
     private void Start()
     {
-        InitiateButtons();
         ValidateAnimationDictionary();
         tweenHeight = (myImages.Length * IconSizeFactor) - 280;
     }
 
     private void InitiateButtons()
     {
-        m_UIManager.GetButton(m_Key.m_button_spin).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_spin).onClick.AddListener(delegate { StartSlots(); });
-
-        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(OnBetOne);
-
-        m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.AddListener(AutoSpin);
-
-        m_UIManager.GetButton(m_Key.m_button_auto_spin_stop).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_auto_spin_stop).onClick.AddListener(StopAutoSpin);
+        m_GameManager.OnSpinClicked += delegate { StartSlots(); };
+        m_GameManager.OnBetButtonClicked += delegate { OnBetOne(); };
+        m_GameManager.OnAutoSpinClicked += delegate { AutoSpin(); };
+        m_GameManager.OnAutoSpinStopClicked += delegate { StopAutoSpin(); };
     }
 
     internal void SetInitialUI()
@@ -292,6 +300,11 @@ public class SlotBehaviour : MonoBehaviour
     private IEnumerator TweenRoutine()
     {
         ClearAllImageAnimations();
+        m_Bonus_Found = false;
+        m_Speed_Control = 0.2f;
+        m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(true);
+        m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).SetActive(false);
+        m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).GetComponent<ImageAnimation>().StopAnimation();
 
         // Check if the player has enough balance to spin and if it's not a free spin
         if (currentBalance < currentTotalBet && !IsFreeSpin)
@@ -316,7 +329,7 @@ public class SlotBehaviour : MonoBehaviour
         for (int i = 0; i < numberOfSlots; i++)
         {
             InitializeTweening(Slot_Transform[i]);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
         }
 
         // For demo purposes: Custom inputs for balance and bet
@@ -336,20 +349,37 @@ public class SlotBehaviour : MonoBehaviour
         // For demo purposes: Custom result data (simulated results)
         List<int> simulatedResultReel = new List<int>
         {
-            UnityEngine.Random.Range(0, myImages.Length),
-            UnityEngine.Random.Range(0, myImages.Length),
-            UnityEngine.Random.Range(0, myImages.Length),
+            //UnityEngine.Random.Range(0, myImages.Length),
+            //UnityEngine.Random.Range(0, myImages.Length),
+            //UnityEngine.Random.Range(0, myImages.Length),
+            1, 1, 1,
             UnityEngine.Random.Range(0, myBonusImages.Length)
         }; // Custom input: Simulated slot result
 
         AssignResultSpritesWin(simulatedResultReel); //Takes the list as argument and assigns to the slot and bonus slots
 
-        yield return new WaitForSeconds(0.5f);
+        if (m_GameManager.TurboSpin)
+        {
+            yield return new WaitForSeconds(0f);
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
 
         // Stop all tweens running for each slot
-        for (int i = 0; i < numberOfSlots; i++)
+        for (int i = 0; i < numberOfSlots-1; i++)
         {
             yield return StopTweening(5, Slot_Transform[i], i);
+        }
+        if (m_Bonus_Found)
+        {
+            yield return new WaitForSeconds(1.5f);
+            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1);
+        }
+        else
+        {
+            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1);
         }
 
         yield return new WaitForSeconds(0.3f);
@@ -362,6 +392,7 @@ public class SlotBehaviour : MonoBehaviour
 
         // For demo purposes: Custom win amount and balance updates
         double simulatedWinAmount = 50.0; // Custom input: Simulated win amount
+
         m_UIManager.GetText(m_Key.m_text_win_amount).text = simulatedWinAmount.ToString("f2");
         m_UIManager.GetText(m_Key.m_text_balance_amount).text = (balance + simulatedWinAmount).ToString("f2");
 
@@ -421,7 +452,7 @@ public class SlotBehaviour : MonoBehaviour
                     Tempimages[j].slotImages[0].sprite = null;
                 }
             }
-            Debug.Log("<color=yellow><b>" + j + "</b></color>");
+            // Debug.Log("<color=yellow><b>" + j + "</b></color>");
         }
 
         CheckWin(m_slot_values);
@@ -443,33 +474,54 @@ public class SlotBehaviour : MonoBehaviour
         if (!check_zero)
         {
             Debug.Log(string.Concat("<color=red><b>", "Zero Found...", "</b></color>"));
-            // NOTE: This if condition shows if the bonus section is not zero then check slot sections for zeros
+            // HACK: This if condition shows if the bonus section is not zero then check slot sections for zeros
             if (result_reel[result_reel.Count - 1] != 0)
             {
-                // NOTE: If bonus is not zero and still the zero count is greater than 0 that means for sure slots have zero values so no need to play animation
+                // HACK: If bonus is not zero and still the zero count is greater than 0 that means for sure slots have zero values so no need to play animation
                 return;
             }
-            // NOTE: This else part shows if the bonus section is zero then along with bonus check slots zeros too
+            // HACK: This else part shows if the bonus section is zero then along with bonus check slots zeros too
             else
             {
-                if ((zero_count - 1) > 0)
+                if ((zero_count - 1) == 0)
                 {
-                    // NOTE: That means including bonus section also in the slot section there are zeros
-                }
-                else
-                {
-                    // NOTE: That means except bonus section there are no zeros in slot section so play the combo animations for slots
+                    // HACK: That means except bonus section there are no zeros in slot section so play the combo animations for slots
                     PlaySpriteAnimation(false, result_reel);
                 }
             }
         }
-        // NOTE: Got the slots + bonus boiii...
+        // HACK: Got the slots + bonus boiii...
         else
         {
             // TODO: Play Slots and Bonus Animations.
             Debug.Log(string.Concat("<color=green><b>", "Zero Not Found...", "</b></color>"));
+
+            if (CheckCombo(result_reel))
+            {
+                m_Bonus_Found = true;
+                m_Speed_Control = 0.01f;
+            }
+
+            m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(false);
+            m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).SetActive(true);
+            m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).GetComponent<ImageAnimation>().StartAnimation();
             PlaySpriteAnimation(true, result_reel);
         }
+    }
+
+    private bool CheckCombo(List<int> m_reel)
+    {
+        int d = m_reel[0];
+        int c = 0;
+        for(int i = 0; i < m_reel.Count - 1; i ++)
+        {
+            if(m_reel[i] == d)
+            {
+                c++;
+            }
+        }
+        if (c == 3) return true;
+        else return false;
     }
 
     private void PlaySpriteAnimation(bool m_config, List<int> m_reel)
@@ -482,7 +534,7 @@ public class SlotBehaviour : MonoBehaviour
                 {
                     ImageAnimation m_anim_obj = Tempimages[i].slotImages[0].gameObject.GetComponent<ImageAnimation>();
                     SlotAnimationsSwitch(true, m_reel[i], m_anim_obj);
-                    Debug.Log(string.Concat("<color=cyan><b>", "Bonus Found...", "</b></color>"));
+                    Debug.Log(string.Concat("<color=cyan><b>", "Bonus Available...", "</b></color>"));
                 }
                 else if(i == m_reel.Count - 1)
                 {
@@ -513,6 +565,14 @@ public class SlotBehaviour : MonoBehaviour
                 case 1:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo7);
                     m_anim_object.StartAnimation();
+                    Transform m_obj = m_UIManager.GetGameObject(m_Key.m_object_single7_combo).transform.GetChild(0);
+                    int child_count = m_obj.childCount;
+                    for(int i = 0; i < child_count; i++)
+                    {
+                        ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
+                        m_anim.StartAnimation();
+                        m_imageAnimations.Add(m_anim);
+                    }
                     break;
                 case 2:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo77);
@@ -601,7 +661,6 @@ public class SlotBehaviour : MonoBehaviour
 
     void ToggleButtonGrp(bool toggle)
     {
-
         m_UIManager.GetButton(m_Key.m_button_spin).interactable = toggle;
         m_UIManager.GetButton(m_Key.m_button_bet_button).interactable = toggle;
         m_UIManager.GetButton(m_Key.m_button_auto_spin).interactable = toggle;
@@ -650,7 +709,16 @@ public class SlotBehaviour : MonoBehaviour
     private void InitializeTweening(Transform slotTransform)
     {
         slotTransform.localPosition = new Vector2(slotTransform.localPosition.x, slotTransform.localPosition.y - tweenHeight);
-        Tweener tweener = slotTransform.DOLocalMoveY(tweenHeight, 0.2f).SetLoops(-1, LoopType.Restart).SetDelay(0);
+        Tweener tweener;
+        if (m_GameManager.TurboSpin)
+        {
+            tweener = slotTransform.DOLocalMoveY(tweenHeight, 0.5f).SetLoops(1, LoopType.Restart).SetDelay(0);
+        }
+        else
+        {
+            tweener = slotTransform.DOLocalMoveY(tweenHeight, m_Speed_Control).SetLoops(-1, LoopType.Restart).SetDelay(0);
+        }
+
         tweener.Play();
         alltweens.Add(tweener);
     }
@@ -659,7 +727,14 @@ public class SlotBehaviour : MonoBehaviour
     {
         alltweens[index].Pause();
         int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor));
-        alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + 100 + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.5f).SetEase(Ease.OutElastic);
+        if (m_GameManager.TurboSpin)
+        {
+            alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + 100 + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0f).SetLoops(1).SetDelay(0);
+        }
+        else
+        {
+            alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + 100 + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.5f).SetEase(Ease.OutElastic);
+        }
         yield return new WaitForSeconds(0.2f);
     }
 
@@ -732,6 +807,14 @@ public class SlotBehaviour : MonoBehaviour
         return null;
     }
     #endregion
+
+    private void OnDisable()
+    {
+        m_GameManager.OnSpinClicked -= delegate { StartSlots(); };
+        m_GameManager.OnBetButtonClicked -= delegate { OnBetOne(); };
+        m_GameManager.OnAutoSpinClicked -= delegate { AutoSpin(); };
+        m_GameManager.OnAutoSpinStopClicked -= delegate { StopAutoSpin(); };
+    }
 }
 
 [System.Serializable]
