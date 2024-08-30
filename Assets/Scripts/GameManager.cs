@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,18 +37,20 @@ public class GameManager : MonoBehaviour
     protected internal int StopPos_Plus = 50;
     #endregion
 
-    private KeyStruct m_Key;
+    private bool m_SettingsClicked = false;
 
-    private void Start()
-    {
-        m_Key = new KeyStruct();
-        InitiateButtons();
-    }
+    private KeyStruct m_Key;
 
     private void OnEnable()
     {
         OnFreeSpinReceived += FreeSpinAction;
         OnFreeSpinEnded += FreeSpinStopAction;
+    }
+
+    private void Start()
+    {
+        m_Key = new KeyStruct();
+        InitiateButtons();
     }
 
     private void InitiateButtons()
@@ -72,6 +75,18 @@ public class GameManager : MonoBehaviour
 
         m_UIManager.GetButton(m_Key.m_button_settings).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_settings).onClick.AddListener(SettingsButtonClickedAction);
+
+        m_UIManager.GetButton(m_Key.m_button_music).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_music).onClick.AddListener(OnMusicButtonClicked);
+
+        m_UIManager.GetButton(m_Key.m_button_info).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_info).onClick.AddListener(OnInfoButtonClicked);
+
+        m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.AddListener(delegate { ExitPopup("music"); });
+
+        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ExitPopup("info"); });
     }
 
     // This is the method use to trigger and off the turbo spin
@@ -93,7 +108,14 @@ public class GameManager : MonoBehaviour
 
     private void SettingsButtonClickedAction()
     {
-
+        if (m_SettingsClicked)
+        {
+            DeanimateInfoMusicButton();
+        }
+        else
+        {
+            AnimateInfoMusicButton();
+        }
     }
 
     private void FreeSpinAction()
@@ -117,10 +139,55 @@ public class GameManager : MonoBehaviour
         OnFreeSpinEnded?.Invoke();
     }
 
+    private void OnInfoButtonClicked()
+    {
+        DeanimateInfoMusicButton();
+        m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(true);
+        m_UIManager.GetGameObject(m_Key.m_object_paytable_popup).SetActive(true);
+    }
+
+    private void OnMusicButtonClicked()
+    {
+        DeanimateInfoMusicButton();
+        m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(true);
+        m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(true);
+    }
+
     private void OnDisable()
     {
         OnFreeSpinReceived -= FreeSpinAction;
         OnFreeSpinEnded -= FreeSpinStopAction;
+    }
+
+    private void AnimateInfoMusicButton()
+    {
+        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(50f, 0.2f);
+
+        m_SettingsClicked = !m_SettingsClicked;
+    }
+
+    private void DeanimateInfoMusicButton()
+    {
+        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+
+        m_SettingsClicked = !m_SettingsClicked;
+    }
+
+    private void ExitPopup(string m_Config_String)
+    {
+        switch (m_Config_String)
+        {
+            case "info":
+                m_UIManager.GetGameObject(m_Key.m_object_paytable_popup).SetActive(false);
+                m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(false);
+                break;
+            case "music":
+                m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(false);
+                m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(false);
+                break;
+        }
     }
 }
 

@@ -8,6 +8,10 @@ public class KeyStruct
     internal string m_button_turbo_spin = "TurboSpin";
     internal string m_button_turbo_spin_stop = "TurboSpinStop";
     internal string m_button_settings = "Settings";
+    internal string m_button_music_exit = "Music_Exit";
+    internal string m_button_info_exit = "Info_Exit";
+    internal string m_button_music = "Music";
+    internal string m_button_info = "Info";
     #endregion
 
     #region TEXT_REFERENCES_KEY
@@ -58,5 +62,10 @@ public class KeyStruct
     internal string m_object_paytable_popup = "Paytable_Popup";
     internal string m_object_settings_popup = "Settings_Popup";
     internal string m_object_reel_ref = "Reel_Ref";
+    internal string m_object_10x_anim = "10X_Anim";
+    internal string m_object_5x_anim = "5X_Anim";
+    internal string m_object_2x_anim = "2X_Anim";
+    internal string m_object_2dollar_anim = "2Dollar_Anim";
+    internal string m_object_1dollar_anim = "1Dollar_Anim";
     #endregion
 }
