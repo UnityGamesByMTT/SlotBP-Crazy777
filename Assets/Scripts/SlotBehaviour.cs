@@ -297,11 +297,51 @@ public class SlotBehaviour : MonoBehaviour
         }
     }
 
+    internal void FreeSpin(int spins)
+    {
+        if (!IsFreeSpin)
+        {
+            if (IsAutoSpin)
+            {
+                StopAutoSpin();
+                IsAutoSpin = false;
+            }
+            IsFreeSpin = true;
+            ToggleButtonGrp(false);
+
+            if (FreeSpinRoutine != null)
+            {
+                StopCoroutine(FreeSpinRoutine);
+                FreeSpinRoutine = null;
+            }
+            FreeSpinRoutine = StartCoroutine(FreeSpinCoroutine(spins));
+
+        }
+    }
+
+    private IEnumerator FreeSpinCoroutine(int spinchances)
+    {
+        int i = 0;
+        while (i < spinchances)
+        {
+            StartSlots(IsAutoSpin);
+            yield return tweenroutine;
+            i++;
+        }
+        ToggleButtonGrp(true);
+        IsFreeSpin = false;
+        m_GameManager.InvokeFreeSpinEnd();
+    }
+
     private IEnumerator TweenRoutine()
     {
+        // Clear all previous animations and reset the state for a new spin
         ClearAllImageAnimations();
+        ResetUpperAnimations();
         m_Bonus_Found = false;
         m_Speed_Control = 0.2f;
+
+        // Display the normal win line and hide the animated win line
         m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(true);
         m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).SetActive(false);
         m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).GetComponent<ImageAnimation>().StopAnimation();
@@ -332,31 +372,33 @@ public class SlotBehaviour : MonoBehaviour
             yield return new WaitForSeconds(0.01f);
         }
 
-        // For demo purposes: Custom inputs for balance and bet
-        double bet = 10.0; // Custom input: Fixed bet amount for demo
+        // Handle the betting and balance updates
+        double bet = IsFreeSpin ? 0.0 : currentTotalBet; // No bet deduction during free spins
         double balance = currentBalance;
 
-        // Update the balance after placing the bet
-        double initAmount = balance;
-        balance -= bet;
-
-        // Tween the balance display to reflect the new balance
-        DOTween.To(() => initAmount, (val) => initAmount = val, balance, 0.8f).OnUpdate(() =>
+        // Update the balance after placing the bet (only if it's not a free spin)
+        if (!IsFreeSpin)
         {
-            m_UIManager.GetText(m_Key.m_text_balance_amount).text = initAmount.ToString("f2");
-        });
+            double initAmount = balance;
+            balance -= bet;
+
+            // Tween the balance display to reflect the new balance
+            DOTween.To(() => initAmount, (val) => initAmount = val, balance, 0.8f).OnUpdate(() =>
+            {
+                m_UIManager.GetText(m_Key.m_text_balance_amount).text = initAmount.ToString("f2");
+            });
+        }
 
         // For demo purposes: Custom result data (simulated results)
         List<int> simulatedResultReel = new List<int>
-        {
-            //UnityEngine.Random.Range(0, myImages.Length),
-            //UnityEngine.Random.Range(0, myImages.Length),
-            //UnityEngine.Random.Range(0, myImages.Length),
-            1, 1, 1,
-            UnityEngine.Random.Range(0, myBonusImages.Length)
-        }; // Custom input: Simulated slot result
+    {
+        UnityEngine.Random.Range(0, myImages.Length),
+        UnityEngine.Random.Range(0, myImages.Length),
+        UnityEngine.Random.Range(0, myImages.Length),6,
+        //UnityEngine.Random.Range(0, myBonusImages.Length)
+    }; // Custom input: Simulated slot result
 
-        AssignResultSpritesWin(simulatedResultReel); //Takes the list as argument and assigns to the slot and bonus slots
+        AssignResultSpritesWin(simulatedResultReel); // Assign the simulated results to the slot and bonus slots
 
         if (m_GameManager.TurboSpin)
         {
@@ -368,18 +410,18 @@ public class SlotBehaviour : MonoBehaviour
         }
 
         // Stop all tweens running for each slot
-        for (int i = 0; i < numberOfSlots-1; i++)
+        for (int i = 0; i < numberOfSlots - 1; i++)
         {
-            yield return StopTweening(5, Slot_Transform[i], i);
+            yield return StopTweening(5, Slot_Transform[i], i, simulatedResultReel[i] != 0 ? 0 : m_GameManager.StopPos_Plus);
         }
-        if (m_Bonus_Found)
+        if (m_Bonus_Found && !m_GameManager.TurboSpin)
         {
             yield return new WaitForSeconds(1.5f);
-            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1);
+            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
         }
         else
         {
-            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1);
+            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
         }
 
         yield return new WaitForSeconds(0.3f);
@@ -391,7 +433,7 @@ public class SlotBehaviour : MonoBehaviour
         KillAllTweens();
 
         // For demo purposes: Custom win amount and balance updates
-        double simulatedWinAmount = 50.0; // Custom input: Simulated win amount
+        double simulatedWinAmount = 30.0; // Custom input: Simulated win amount
 
         m_UIManager.GetText(m_Key.m_text_win_amount).text = simulatedWinAmount.ToString("f2");
         m_UIManager.GetText(m_Key.m_text_balance_amount).text = (balance + simulatedWinAmount).ToString("f2");
@@ -403,7 +445,7 @@ public class SlotBehaviour : MonoBehaviour
         yield return new WaitUntil(() => !CheckPopups);
 
         // Handle the end of the spin, either by re-enabling the buttons or starting the next auto-spin
-        if (!IsAutoSpin)
+        if (!IsAutoSpin && !IsFreeSpin)
         {
             //ActivateGamble();
             ToggleButtonGrp(true);
@@ -416,8 +458,11 @@ public class SlotBehaviour : MonoBehaviour
             IsSpinning = false;
         }
 
-        // Optional: Handle free spins if applicable (To be implemented)
-        // TODO: Implement free spin logic based on backend data
+        //Free Spin
+        if (m_GameManager.DemoFreeSpin)
+        {
+            m_GameManager.InvokeFreeSpin();
+        }
     }
 
     #region RESULT_FUNCTIONALITIES
@@ -430,29 +475,24 @@ public class SlotBehaviour : MonoBehaviour
             {
                 if (m_slot_values[j] != 0)
                 {
-                    Tempimages[j].slotImages[0].color = new Color(255, 255, 255, 255);
                     Tempimages[j].slotImages[0].sprite = myImages[m_slot_values[j]];
                 }
                 else
                 {
-                    Tempimages[j].slotImages[0].color = new Color(255, 255, 255, 0);
-                    Tempimages[j].slotImages[0].sprite = null;
+                    Tempimages[j].slotImages[0].sprite = myImages[UnityEngine.Random.Range(1, myImages.Length-1)];
                 }
             }
             else
             {
                 if (m_slot_values[j] != 0)
                 {
-                    Tempimages[j].slotImages[0].color = new Color(255, 255, 255, 255);
                     Tempimages[j].slotImages[0].sprite = myBonusImages[m_slot_values[j]];
                 }
                 else
                 {
-                    Tempimages[j].slotImages[0].color = new Color(255, 255, 255, 0);
-                    Tempimages[j].slotImages[0].sprite = null;
+                    Tempimages[j].slotImages[0].sprite = myBonusImages[UnityEngine.Random.Range(1, myImages.Length - 1)];
                 }
             }
-            // Debug.Log("<color=yellow><b>" + j + "</b></color>");
         }
 
         CheckWin(m_slot_values);
@@ -560,35 +600,89 @@ public class SlotBehaviour : MonoBehaviour
         // If Slots
         if (m_config_slot_bonus)
         {
+            Transform m_obj;
+            int child_count;
             switch (slot_id)
             {
                 case 1:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo7);
                     m_anim_object.StartAnimation();
-                    Transform m_obj = m_UIManager.GetGameObject(m_Key.m_object_single7_combo).transform.GetChild(0);
-                    int child_count = m_obj.childCount;
-                    for(int i = 0; i < child_count; i++)
+
+                    if (m_Bonus_Found)
                     {
-                        ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
-                        m_anim.StartAnimation();
-                        m_imageAnimations.Add(m_anim);
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_single7_combo).transform.GetChild(0);
+                        child_count = m_obj.childCount;
+                        for (int i = 0; i < child_count; i++)
+                        {
+                            ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
+                            m_anim.StartAnimation();
+                            m_imageAnimations.Add(m_anim);
+                        }
                     }
                     break;
                 case 2:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo77);
                     m_anim_object.StartAnimation();
+
+                    if (m_Bonus_Found)
+                    {
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_double7_combo).transform.GetChild(0);
+                        child_count = m_obj.childCount;
+                        for (int i = 0; i < child_count; i++)
+                        {
+                            ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
+                            m_anim.StartAnimation();
+                            m_imageAnimations.Add(m_anim);
+                        }
+                    }
                     break;
                 case 3:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo777);
                     m_anim_object.StartAnimation();
+
+                    if (m_Bonus_Found)
+                    {
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_triple7_combo).transform.GetChild(0);
+                        child_count = m_obj.childCount;
+                        for (int i = 0; i < child_count; i++)
+                        {
+                            ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
+                            m_anim.StartAnimation();
+                            m_imageAnimations.Add(m_anim);
+                        }
+                    }
                     break;
                 case 4:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_bar);
                     m_anim_object.StartAnimation();
+
+                    if (m_Bonus_Found)
+                    {
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_single_bar_combo).transform.GetChild(0);
+                        child_count = m_obj.childCount;
+                        for (int i = 0; i < child_count; i++)
+                        {
+                            ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
+                            m_anim.StartAnimation();
+                            m_imageAnimations.Add(m_anim);
+                        }
+                    }
                     break;
                 case 5:
                     m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_bar_bar);
                     m_anim_object.StartAnimation();
+
+                    if (m_Bonus_Found)
+                    {
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_double_bar_combo).transform.GetChild(0);
+                        child_count = m_obj.childCount;
+                        for (int i = 0; i < child_count; i++)
+                        {
+                            ImageAnimation m_anim = m_obj.GetChild(i).GetComponent<ImageAnimation>();
+                            m_anim.StartAnimation();
+                            m_imageAnimations.Add(m_anim);
+                        }
+                    }
                     break;
             }
         }
@@ -625,6 +719,15 @@ public class SlotBehaviour : MonoBehaviour
                     break;
             }
         }
+    }
+
+    private void ResetUpperAnimations()
+    {
+        foreach(var i in m_imageAnimations)
+        {
+            i.StopAnimation();
+        }
+        m_imageAnimations.Clear();
     }
 
     #endregion
@@ -723,19 +826,19 @@ public class SlotBehaviour : MonoBehaviour
         alltweens.Add(tweener);
     }
 
-    private IEnumerator StopTweening(int reqpos, Transform slotTransform, int index)
+    private IEnumerator StopTweening(int reqpos, Transform slotTransform, int index, int m_StopPos)
     {
         alltweens[index].Pause();
         int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor));
         if (m_GameManager.TurboSpin)
         {
-            alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + 100 + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0f).SetLoops(1).SetDelay(0);
+            alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + (100 + m_StopPos) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0f).SetLoops(1).SetDelay(0);
         }
         else
         {
-            alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + 100 + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.5f).SetEase(Ease.OutElastic);
+            alltweens[index] = slotTransform.DOLocalMoveY(-tweenpos + (100 + m_StopPos) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.5f).SetEase(Ease.OutElastic);
         }
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.15f);
     }
 
     private void KillAllTweens()

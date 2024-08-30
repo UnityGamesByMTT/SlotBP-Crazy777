@@ -20,6 +20,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private List<UiText> uiText = new List<UiText>();
     private Dictionary<string, TMP_Text> uiTextDictionary = new Dictionary<string, TMP_Text>();
 
+    [Header("Sprite References")]
+    [SerializeField] private List<UiSprite> uiSprite = new List<UiSprite>();
+    private Dictionary<string, Sprite> uiSpriteDictionary = new Dictionary<string, Sprite>();
+
     [Header("GameObjects References")]
     [SerializeField] private List<UiGameObject> uiGameObject = new List<UiGameObject>();
     private Dictionary<string, GameObject> uiGameObjectDictionary = new Dictionary<string, GameObject>();
@@ -31,6 +35,7 @@ public class UIManager : MonoBehaviour
         UpdateButtonDictionary();
         UpdateInputFieldDictionary();
         UpdateTextDictionary();
+        UpdateSpriteDictionary();
         UpdateGameObjectDictionary();
     }
 
@@ -68,6 +73,18 @@ public class UIManager : MonoBehaviour
             if (uiReference.text != null && !uiTextDictionary.ContainsKey(uiReference.key))
             {
                 uiTextDictionary.Add(uiReference.key, uiReference.text);
+            }
+        }
+    }
+
+    private void UpdateSpriteDictionary()
+    {
+        uiSpriteDictionary.Clear();
+        foreach(UiSprite uiReference in uiSprite)
+        {
+            if(uiReference.Sprite != null && !uiSpriteDictionary.ContainsKey(uiReference.key))
+            {
+                uiSpriteDictionary.Add(uiReference.key, uiReference.Sprite);
             }
         }
     }
@@ -117,6 +134,15 @@ public class UIManager : MonoBehaviour
         return null;
     }
 
+    internal Sprite GetSprite(string key)
+    {
+        if (uiSpriteDictionary.ContainsKey(key))
+        {
+            return uiSpriteDictionary[key];
+        }
+        return null;
+    }
+
     internal GameObject GetGameObject(string key)
     {
         //Debug.Log(string.Concat("<color=yellow><b>", key, "</b></color>"));
@@ -150,6 +176,13 @@ public struct UiText
 {
     public string key;
     public TMP_Text text;
+}
+
+[System.Serializable]
+public struct UiSprite
+{
+    public string key;
+    public Sprite Sprite;
 }
 
 [System.Serializable]

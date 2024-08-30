@@ -7,6 +7,7 @@ public class KeyStruct
     internal string m_button_bet_button = "Bet";
     internal string m_button_turbo_spin = "TurboSpin";
     internal string m_button_turbo_spin_stop = "TurboSpinStop";
+    internal string m_button_settings = "Settings";
     #endregion
 
     #region TEXT_REFERENCES_KEY
@@ -40,6 +41,11 @@ public class KeyStruct
     internal string m_anim_bonus_respin = "Respin";
     #endregion
 
+    #region SPRITE_REFERENCES
+    internal string m_sprite_normal_reel = "Normal_Reel";
+    internal string m_sprite_free_spin_reel = "FreeSpin_Reel";
+    #endregion
+
     #region GAMEOBJECT_REFERENCES_KEY
     internal string m_object_normal_win_line = "Normal_Win_Line";
     internal string m_object_animated_win_line = "Animated_Win_Line";
@@ -48,5 +54,9 @@ public class KeyStruct
     internal string m_object_triple7_combo = "Triple7_Combo";
     internal string m_object_single_bar_combo = "SingleBar_Combo";
     internal string m_object_double_bar_combo = "DoubleBar_Combo";
+    internal string m_object_popup_panel = "Popup";
+    internal string m_object_paytable_popup = "Paytable_Popup";
+    internal string m_object_settings_popup = "Settings_Popup";
+    internal string m_object_reel_ref = "Reel_Ref";
     #endregion
 }
