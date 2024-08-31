@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_settings).onClick.AddListener(SettingsButtonClickedAction);
 
         m_UIManager.GetButton(m_Key.m_button_music).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music).onClick.AddListener(OnMusicButtonClicked);
+        m_UIManager.GetButton(m_Key.m_button_music).onClick.AddListener(OnSettingButtonClicked);
 
         m_UIManager.GetButton(m_Key.m_button_info).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_info).onClick.AddListener(OnInfoButtonClicked);
@@ -119,10 +119,10 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_max_auto_spin).onClick.AddListener(AutoSpinMax);
 
         m_UIManager.GetButton(m_Key.m_button_music_on).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music_on).onClick.AddListener(OnMusicClicked);
+        m_UIManager.GetButton(m_Key.m_button_music_on).onClick.AddListener(OnMusicButtonClicked);
 
         m_UIManager.GetButton(m_Key.m_button_music_off).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music_off).onClick.AddListener(OnMusicClicked);
+        m_UIManager.GetButton(m_Key.m_button_music_off).onClick.AddListener(OnMusicButtonClicked);
     }
 
     private IEnumerator InitialAnimation()
@@ -193,11 +193,13 @@ public class GameManager : MonoBehaviour
     private void FreeSpinAction()
     {
         m_UIManager.GetGameObject(m_Key.m_object_reel_ref).GetComponent<Image>().sprite = m_UIManager.GetSprite(m_Key.m_sprite_free_spin_reel);
+        m_UIManager.GetGameObject(m_Key.m_object_reel_ref).transform.GetChild(1).GetComponent<Image>().color = new Color(255, 255, 0, 255);
     }
 
     private void FreeSpinStopAction()
     {
         m_UIManager.GetGameObject(m_Key.m_object_reel_ref).GetComponent<Image>().sprite = m_UIManager.GetSprite(m_Key.m_sprite_normal_reel);
+        m_UIManager.GetGameObject(m_Key.m_object_reel_ref).transform.GetChild(1).GetComponent<Image>().color = new Color(255, 255, 255, 255);
     }
 
     internal void InvokeFreeSpin()
@@ -218,7 +220,7 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetGameObject(m_Key.m_object_paytable_popup).SetActive(true);
     }
 
-    private void OnMusicButtonClicked()
+    private void OnSettingButtonClicked()
     {
         DeanimateInfoMusicButton();
         m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(true);
@@ -271,6 +273,7 @@ public class GameManager : MonoBehaviour
 
     private void AutoSpinPlusMinus(bool m_config)
     {
+        AutoSpin_Count = int.Parse(m_UIManager.GetText(m_Key.m_text_total_auto_spin).text);
         if (m_config)
         {
             if(AutoSpin_Count < 10)
@@ -281,7 +284,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (AutoSpin_Count > 0)
+            if (AutoSpin_Count > 5)
             {
                 AutoSpin_Count--;
                 m_UIManager.GetText(m_Key.m_text_total_auto_spin).text = AutoSpin_Count.ToString();
@@ -289,7 +292,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void OnMusicClicked()
+    private void OnMusicButtonClicked()
     {
         //DeanimateInfoMusicButton();
 

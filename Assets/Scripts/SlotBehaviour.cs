@@ -198,6 +198,8 @@ public class SlotBehaviour : MonoBehaviour
     {
         if (audioController) audioController.PlaySpinButtonAudio();
 
+        m_GameManager.AutoSpin_Count = int.Parse(m_UIManager.GetText(m_Key.m_text_total_auto_spin).text);
+
         if (!IsAutoSpin)
         {
             IsAutoSpin = true;
@@ -479,7 +481,6 @@ public class SlotBehaviour : MonoBehaviour
             else
             {
                 StopAutoSpin();
-                m_GameManager.AutoSpin_Count = 10;
             }
         }
 
