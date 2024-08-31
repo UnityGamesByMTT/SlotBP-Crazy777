@@ -12,6 +12,12 @@ public class KeyStruct
     internal string m_button_info_exit = "Info_Exit";
     internal string m_button_music = "Music";
     internal string m_button_info = "Info";
+    internal string m_button_max_auto_spin = "MaxAutoSpin";
+    internal string m_button_auto_spin_plus = "AutoSpin_Plus";
+    internal string m_button_auto_spin_minus = "AutoSpin_Minus";
+    internal string m_auto_spin_setting_done = "AutoSpinSetting_Done";
+    internal string m_button_music_on = "Music_On";
+    internal string m_button_music_off = "Music_Off";
     #endregion
 
     #region TEXT_REFERENCES_KEY
@@ -28,6 +34,7 @@ public class KeyStruct
     internal string m_text_any_7 = "Any7";
     internal string m_text_any_bar = "AnyBar";
     internal string m_text_any = "Any";
+    internal string m_text_total_auto_spin = "TotalAutoSpin";
     #endregion
 
     #region ANIMATED_SPRITES_LIST_KEY
@@ -67,5 +74,9 @@ public class KeyStruct
     internal string m_object_2x_anim = "2X_Anim";
     internal string m_object_2dollar_anim = "2Dollar_Anim";
     internal string m_object_1dollar_anim = "1Dollar_Anim";
+    internal string m_object_respin_anim = "Respin_Anim";
+    internal string m_object_game_buttons_panel = "Game_Buttons_Panel";
+    internal string m_object_start_animation_panel = "Start_Animation_Panel";
+    internal string m_object_music_button_holder = "Music_Button_Holder";
     #endregion
 }

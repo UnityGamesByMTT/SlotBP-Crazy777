@@ -33,10 +33,16 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region SERIALIZED_INTEGERS
-    [SerializeField]
-    protected internal int StopPos_Plus = 50;
+    [SerializeField] internal int StopPos_Plus = 50;
+    [SerializeField] internal int AutoSpin_Count = 10;
     #endregion
 
+    #region SERIALIZED_ARRAYS_AND_LISTS
+    [SerializeField]
+    private List<GameObject> m_Initial_Animation;
+    #endregion
+
+    private Coroutine M_Initial_Animation = null;
     private bool m_SettingsClicked = false;
 
     private KeyStruct m_Key;
@@ -47,10 +53,22 @@ public class GameManager : MonoBehaviour
         OnFreeSpinEnded += FreeSpinStopAction;
     }
 
-    private void Start()
+    private void Awake()
     {
         m_Key = new KeyStruct();
+        M_Initial_Animation = StartCoroutine(InitialAnimation());
+    }
+
+    private void Start()
+    {
+        InitialSetup();
+
         InitiateButtons();
+    }
+
+    private void InitialSetup()
+    {
+        m_UIManager.GetText(m_Key.m_text_total_auto_spin).text = AutoSpin_Count.ToString();
     }
 
     private void InitiateButtons()
@@ -87,6 +105,60 @@ public class GameManager : MonoBehaviour
 
         m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ExitPopup("info"); });
+
+        m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.AddListener(AutoSpinSettingsConfig);
+
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_plus).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_plus).onClick.AddListener(delegate { AutoSpinPlusMinus(true); });
+
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_minus).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_minus).onClick.AddListener(delegate { AutoSpinPlusMinus(false); });
+
+        m_UIManager.GetButton(m_Key.m_button_max_auto_spin).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_max_auto_spin).onClick.AddListener(AutoSpinMax);
+
+        m_UIManager.GetButton(m_Key.m_button_music_on).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_music_on).onClick.AddListener(OnMusicClicked);
+
+        m_UIManager.GetButton(m_Key.m_button_music_off).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_music_off).onClick.AddListener(OnMusicClicked);
+    }
+
+    private IEnumerator InitialAnimation()
+    {
+        m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(true);
+        m_UIManager.GetGameObject(m_Key.m_object_game_buttons_panel).SetActive(false);
+
+        m_Initial_Animation[0].SetActive(true);
+        m_Initial_Animation[0].GetComponent<ImageAnimation>().StartAnimation();
+        m_Initial_Animation[0].transform.DOLocalMoveX(550, 0.8f).SetEase(Ease.Linear);
+
+        yield return new WaitForSeconds(.2f);
+
+        for(int i = 1; i < m_Initial_Animation.Count; i++)
+        {
+            GameObject _m = m_Initial_Animation[i];
+            _m.SetActive(true);
+            _m.GetComponent<ImageAnimation>().StartAnimation();
+            _m.transform.DOLocalMoveY(-180, 0.8f).SetEase(Ease.Linear);
+            yield return new WaitForSeconds(.2f);
+        }
+
+        yield return new WaitForSeconds(1f);
+
+        foreach(var i in m_Initial_Animation)
+        {
+            i.SetActive(false);
+            i.GetComponent<ImageAnimation>().StopAnimation();
+        }
+
+        yield return new WaitForSeconds(.2f);
+
+        m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(false);
+        m_UIManager.GetGameObject(m_Key.m_object_game_buttons_panel).SetActive(true);
+
+        StopCoroutine(M_Initial_Animation);
     }
 
     // This is the method use to trigger and off the turbo spin
@@ -161,8 +233,9 @@ public class GameManager : MonoBehaviour
 
     private void AnimateInfoMusicButton()
     {
-        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
-        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(50f, 0.2f);
+        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(150f, 0.2f);
+        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+        m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(50f, 0.2f);
 
         m_SettingsClicked = !m_SettingsClicked;
     }
@@ -171,6 +244,7 @@ public class GameManager : MonoBehaviour
     {
         m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
         m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+        m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(-15f, 0.2f);
 
         m_SettingsClicked = !m_SettingsClicked;
     }
@@ -188,6 +262,54 @@ public class GameManager : MonoBehaviour
                 m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(false);
                 break;
         }
+    }
+
+    private void AutoSpinSettingsConfig()
+    {
+        ExitPopup("music");
+    }
+
+    private void AutoSpinPlusMinus(bool m_config)
+    {
+        if (m_config)
+        {
+            if(AutoSpin_Count < 10)
+            {
+                AutoSpin_Count++;
+                m_UIManager.GetText(m_Key.m_text_total_auto_spin).text = AutoSpin_Count.ToString();
+            }
+        }
+        else
+        {
+            if (AutoSpin_Count > 0)
+            {
+                AutoSpin_Count--;
+                m_UIManager.GetText(m_Key.m_text_total_auto_spin).text = AutoSpin_Count.ToString();
+            }
+        }
+    }
+
+    private void OnMusicClicked()
+    {
+        //DeanimateInfoMusicButton();
+
+        GameObject m_music_obj = m_UIManager.GetButton(m_Key.m_button_music_on).gameObject;
+        if (m_music_obj.activeSelf)
+        {
+            m_music_obj.SetActive(false);
+            m_UIManager.GetButton(m_Key.m_button_music_off).gameObject.SetActive(true);
+        }
+        else
+        {
+            m_music_obj.SetActive(true);
+            m_UIManager.GetButton(m_Key.m_button_music_off).gameObject.SetActive(false);
+        }
+    }
+
+    private void AutoSpinMax()
+    {
+        AutoSpin_Count = 10;
+        m_UIManager.GetText(m_Key.m_text_total_auto_spin).text = AutoSpin_Count.ToString();
     }
 }
 
