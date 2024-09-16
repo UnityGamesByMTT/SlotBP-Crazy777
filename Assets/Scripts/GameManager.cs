@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     private UIManager m_UIManager;
     [SerializeField]
     private SlotBehaviour m_SlotBehaviour;
+    [SerializeField]
+    private SocketIOManager m_SocketManager;
     #endregion
 
     #region SERIALIZED_BOOLEANS
@@ -127,35 +129,36 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator InitialAnimation()
     {
-        m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(true);
+        //m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(true);
         m_UIManager.GetGameObject(m_Key.m_object_game_buttons_panel).SetActive(false);
 
-        m_Initial_Animation[0].SetActive(true);
-        m_Initial_Animation[0].GetComponent<ImageAnimation>().StartAnimation();
-        m_Initial_Animation[0].transform.DOLocalMoveX(550, 0.8f).SetEase(Ease.Linear);
+        //m_Initial_Animation[0].SetActive(true);
+        //m_Initial_Animation[0].GetComponent<ImageAnimation>().StartAnimation();
+        //m_Initial_Animation[0].transform.DOLocalMoveX(550, 0.8f).SetEase(Ease.Linear);
 
         yield return new WaitForSeconds(.2f);
 
-        for(int i = 1; i < m_Initial_Animation.Count; i++)
-        {
-            GameObject _m = m_Initial_Animation[i];
-            _m.SetActive(true);
-            _m.GetComponent<ImageAnimation>().StartAnimation();
-            _m.transform.DOLocalMoveY(-180, 0.8f).SetEase(Ease.Linear);
-            yield return new WaitForSeconds(.2f);
-        }
+        //for(int i = 1; i < m_Initial_Animation.Count; i++)
+        //{
+        //    GameObject _m = m_Initial_Animation[i];
+        //    _m.SetActive(true);
+        //    _m.GetComponent<ImageAnimation>().StartAnimation();
+        //    _m.transform.DOLocalMoveY(-180, 0.8f).SetEase(Ease.Linear);
+        //    yield return new WaitForSeconds(.2f);
+        //}
 
         yield return new WaitForSeconds(1f);
 
-        foreach(var i in m_Initial_Animation)
-        {
-            i.SetActive(false);
-            i.GetComponent<ImageAnimation>().StopAnimation();
-        }
+        //foreach(var i in m_Initial_Animation)
+        //{
+        //    i.SetActive(false);
+        //    i.GetComponent<ImageAnimation>().StopAnimation();
+        //}
 
         yield return new WaitForSeconds(.2f);
+        yield return new WaitUntil(() => m_SocketManager.isLoaded);
 
-        m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(false);
+        //m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(false);
         m_UIManager.GetGameObject(m_Key.m_object_game_buttons_panel).SetActive(true);
 
         StopCoroutine(M_Initial_Animation);
@@ -204,7 +207,8 @@ public class GameManager : MonoBehaviour
 
     internal void InvokeFreeSpin()
     {
-        m_SlotBehaviour.FreeSpin(UnityEngine.Random.Range(1, 6));
+        //m_SlotBehaviour.FreeSpin(UnityEngine.Random.Range(1, 6));
+        m_SlotBehaviour.FreeSpin(m_SocketManager.resultData.freeSpinCount);
         OnFreeSpinReceived?.Invoke();
     }
 
