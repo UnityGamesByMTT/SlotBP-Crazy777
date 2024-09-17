@@ -82,7 +82,7 @@ public class SlotBehaviour : MonoBehaviour
     #endregion
 
     #region Numbers
-    private int BetCounter = 0;
+    internal int BetCounter = 0;
     private double currentBalance = 0;
     private double currentTotalBet = 0;
     int Lines = 3;
@@ -166,8 +166,17 @@ public class SlotBehaviour : MonoBehaviour
         {
             for (int j = 0; j < Tempimages[i].slotImages.Count; j++)
             {
-                int randomIndex = UnityEngine.Random.Range(0, myImages.Length);
-                Tempimages[i].slotImages[j].sprite = myImages[randomIndex];
+                int randomIndex;
+                if (i < 3)
+                {
+                    randomIndex = UnityEngine.Random.Range(1, myImages.Length - 6);
+                    Tempimages[i].slotImages[j].sprite = myImages[randomIndex];
+                }
+                else
+                {
+                    randomIndex = UnityEngine.Random.Range(myImages.Length - 6, myImages.Length);
+                    Tempimages[i].slotImages[j].sprite = myImages[randomIndex];
+                }
             }
         }
     }
@@ -339,6 +348,7 @@ public class SlotBehaviour : MonoBehaviour
             Debug.Log(string.Concat("<color=green><i>", "Free Spin Executing...", "</i></color>"));
             StartSlots(IsAutoSpin);
             yield return tweenroutine;
+            Debug.Log(string.Concat("<color=yellow><b>", i, " : ", "</b></color>"));
             i++;
         }
         IsFreeSpin = false;
@@ -383,7 +393,17 @@ public class SlotBehaviour : MonoBehaviour
         // Initialize tweening for each slot with a small delay between them
         for (int i = 0; i < numberOfSlots; i++)
         {
-            InitializeTweening(Slot_Transform[i]);
+            if (!IsFreeSpin)
+            {
+                InitializeTweening(Slot_Transform[i]);
+            }
+            else
+            {
+                if(i < numberOfSlots - 1)
+                {
+                    InitializeTweening(Slot_Transform[i]);
+                }
+            }
             yield return new WaitForSeconds(0.01f);
         }
 
@@ -446,14 +466,17 @@ public class SlotBehaviour : MonoBehaviour
         {
             yield return StopTweening(5, Slot_Transform[i], i, simulatedResultReel[i] != 0 ? 0 : m_GameManager.StopPos_Plus);
         }
-        if (m_Bonus_Found && !m_GameManager.TurboSpin)
+        if (!IsFreeSpin)
         {
-            yield return new WaitForSeconds(1.5f);
-            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
-        }
-        else
-        {
-            yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
+            if (m_Bonus_Found && !m_GameManager.TurboSpin)
+            {
+                yield return new WaitForSeconds(1.5f);
+                yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
+            }
+            else
+            {
+                yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
+            }
         }
 
         StartSlotAnimations();
@@ -466,11 +489,8 @@ public class SlotBehaviour : MonoBehaviour
         // Kill all active tweens to ensure no lingering animations
         KillAllTweens();
 
-        // For demo purposes: Custom win amount and balance updates
-        double simulatedWinAmount = 30.0; // Custom input: Simulated win amount
-
-        m_UIManager.GetText(m_Key.m_text_win_amount).text = simulatedWinAmount.ToString("f2");
-        m_UIManager.GetText(m_Key.m_text_balance_amount).text = (balance + simulatedWinAmount).ToString("f2");
+        m_UIManager.GetText(m_Key.m_text_win_amount).text = SocketManager.playerdata.currentWining.ToString("f2");
+        m_UIManager.GetText(m_Key.m_text_balance_amount).text = SocketManager.playerdata.Balance.ToString();
 
         // TODO: Implement backend logic to check for bonus games and win popups
         CheckPopups = false; // Simulated: No popups for demo
@@ -493,20 +513,20 @@ public class SlotBehaviour : MonoBehaviour
         }
 
         // Count number of auto spins
-        if(IsAutoSpin && !IsFreeSpin)
-        {
-            m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString();
-            if (m_GameManager.AutoSpin_Count > 0)
-            {
-                m_GameManager.AutoSpin_Count--;
-                m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString();
+        //if(IsAutoSpin && !IsFreeSpin)
+        //{
+        //    m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString();
+        //    if (m_GameManager.AutoSpin_Count > 0)
+        //    {
+        //        m_GameManager.AutoSpin_Count--;
+        //        m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString();
 
-            }
-            else
-            {
-                StopAutoSpin();
-            }
-        }
+        //    }
+        //    else
+        //    {
+        //        StopAutoSpin();
+        //    }
+        //}
 
         //Free Spin
         if(SocketManager.resultData.isFreeSpin)
@@ -533,26 +553,25 @@ public class SlotBehaviour : MonoBehaviour
     {
         for (int j = 0; j < m_slot_values.Count; j++)
         {
-            //if (j < m_slot_values.Count - 1)
-            //{
-                if (m_slot_values[j] != 0)
+            if (m_slot_values[j] != 0)
+            {
+                if (!IsFreeSpin)
                 {
                     Tempimages[j].slotImages[0].sprite = myImages[m_slot_values[j]];
                 }
                 else
                 {
-                    Tempimages[j].slotImages[0].sprite = myImages[UnityEngine.Random.Range(1, myImages.Length-1)];
+                    if(j < m_slot_values.Count - 1)
+                    {
+                        Tempimages[j].slotImages[0].sprite = myImages[m_slot_values[j]];
+                    }
                 }
-            //}
+            }
             //else
             //{
-            //    if (m_slot_values[j] != 0)
+            //    if (!IsFreeSpin)
             //    {
-            //        Tempimages[j].slotImages[0].sprite = myBonusImages[m_slot_values[j]];
-            //    }
-            //    else
-            //    {
-            //        Tempimages[j].slotImages[0].sprite = myBonusImages[UnityEngine.Random.Range(1, myImages.Length - 1)];
+            //        Tempimages[j].slotImages[0].sprite = myImages[UnityEngine.Random.Range(1, myImages.Length-1)];
             //    }
             //}
         }
@@ -677,13 +696,13 @@ public class SlotBehaviour : MonoBehaviour
             switch (slot_id)
             {
                 case 1:
-                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo7);
+                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo777);
                     //m_anim_object.StartAnimation();
                     m_SlotAnimations.Add(m_anim_object);
 
                     if (m_Bonus_Found)
                     {
-                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_single7_combo).transform.GetChild(0);
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_triple7_combo).transform.GetChild(0);
                         child_count = m_obj.childCount;
                         for (int i = 0; i < child_count; i++)
                         {
@@ -711,13 +730,13 @@ public class SlotBehaviour : MonoBehaviour
                     }
                     break;
                 case 3:
-                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo777);
+                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_combo7);
                     //m_anim_object.StartAnimation();
                     m_SlotAnimations.Add(m_anim_object);
 
                     if (m_Bonus_Found)
                     {
-                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_triple7_combo).transform.GetChild(0);
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_single7_combo).transform.GetChild(0);
                         child_count = m_obj.childCount;
                         for (int i = 0; i < child_count; i++)
                         {
@@ -728,13 +747,13 @@ public class SlotBehaviour : MonoBehaviour
                     }
                     break;
                 case 4:
-                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_bar);
+                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_bar_bar);
                     //m_anim_object.StartAnimation();
                     m_SlotAnimations.Add(m_anim_object);
 
                     if (m_Bonus_Found)
                     {
-                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_single_bar_combo).transform.GetChild(0);
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_double_bar_combo).transform.GetChild(0);
                         child_count = m_obj.childCount;
                         for (int i = 0; i < child_count; i++)
                         {
@@ -745,13 +764,13 @@ public class SlotBehaviour : MonoBehaviour
                     }
                     break;
                 case 5:
-                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_bar_bar);
+                    m_anim_object.textureArray = GetSlotAnimationList(m_Key.m_anim_slot_bar);
                     //m_anim_object.StartAnimation();
                     m_SlotAnimations.Add(m_anim_object);
 
                     if (m_Bonus_Found)
                     {
-                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_double_bar_combo).transform.GetChild(0);
+                        m_obj = m_UIManager.GetGameObject(m_Key.m_object_single_bar_combo).transform.GetChild(0);
                         child_count = m_obj.childCount;
                         for (int i = 0; i < child_count; i++)
                         {
@@ -770,42 +789,42 @@ public class SlotBehaviour : MonoBehaviour
             ImageAnimation m_anim;
             switch (slot_id)
             {
-                case 1:
-                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_dollar);
-                    m_anim_object.StartAnimation();
-                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_1dollar_anim).GetComponent<ImageAnimation>();
-                    //m_anim.StartAnimation();
-                    m_SlotAnimations.Add(m_anim);
-                    break;
-                case 2:
-                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_dollar2);
-                    m_anim_object.StartAnimation();
-                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_2dollar_anim).GetComponent<ImageAnimation>();
-                    //m_anim.StartAnimation();
-                    m_SlotAnimations.Add(m_anim);
-                    break;
-                case 3:
-                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_2X);
-                    m_anim_object.StartAnimation();
-                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_2x_anim).GetComponent<ImageAnimation>();
-                    //m_anim.StartAnimation();
-                    m_SlotAnimations.Add(m_anim);
-                    break;
-                case 4:
-                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_5X);
-                    m_anim_object.StartAnimation();
-                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_5x_anim).GetComponent<ImageAnimation>();
-                    //m_anim.StartAnimation();
-                    m_SlotAnimations.Add(m_anim);
-                    break;
-                case 5:
+                case 6:
                     m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_10X);
                     m_anim_object.StartAnimation();
                     m_anim = m_UIManager.GetGameObject(m_Key.m_object_10x_anim).GetComponent<ImageAnimation>();
                     //m_anim.StartAnimation();
                     m_SlotAnimations.Add(m_anim);
                     break;
-                case 6:
+                case 7:
+                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_5X);
+                    m_anim_object.StartAnimation();
+                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_5x_anim).GetComponent<ImageAnimation>();
+                    //m_anim.StartAnimation();
+                    m_SlotAnimations.Add(m_anim);
+                    break;
+                case 8:
+                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_2X);
+                    m_anim_object.StartAnimation();
+                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_2x_anim).GetComponent<ImageAnimation>();
+                    //m_anim.StartAnimation();
+                    m_SlotAnimations.Add(m_anim);
+                    break;
+                case 9:
+                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_dollar2);
+                    m_anim_object.StartAnimation();
+                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_2dollar_anim).GetComponent<ImageAnimation>();
+                    //m_anim.StartAnimation();
+                    m_SlotAnimations.Add(m_anim);
+                    break;
+                case 10:
+                    m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_dollar);
+                    m_anim_object.StartAnimation();
+                    m_anim = m_UIManager.GetGameObject(m_Key.m_object_1dollar_anim).GetComponent<ImageAnimation>();
+                    //m_anim.StartAnimation();
+                    m_SlotAnimations.Add(m_anim);
+                    break;
+                case 11:
                     m_anim_object.textureArray = GetBonusAnimationList(m_Key.m_anim_bonus_respin);
                     m_anim_object.StartAnimation();
                     m_anim = m_UIManager.GetGameObject(m_Key.m_object_respin_anim).GetComponent<ImageAnimation>();
@@ -956,7 +975,7 @@ public class SlotBehaviour : MonoBehaviour
 
     private void KillAllTweens()
     {
-        for (int i = 0; i < numberOfSlots; i++)
+        for (int i = 0; i < alltweens.Count; i++)
         {
             alltweens[i].Kill();
         }

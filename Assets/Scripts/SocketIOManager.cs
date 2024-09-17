@@ -262,11 +262,14 @@ public class SocketIOManager : MonoBehaviour
                     isResultdone = true;
                     break;
                 }
-            case "gambleInitData":
+            case "ExitUser":
                 {
-                    Debug.Log(jsonObject);
-                    myMessage = myData.message;
-                    isResultdone = true;
+                    if (this.manager != null)
+                    {
+                        Debug.Log("Dispose my Socket");
+                        this.manager.Close();
+                    }
+                    Application.ExternalCall("window.parent.postMessage", "onExit", "*");
                     break;
                 }
         }

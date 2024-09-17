@@ -8,6 +8,7 @@ using DG.Tweening;
 public class GameManager : MonoBehaviour
 {
     #region EVENTS_AND_DELEGATES
+    internal event Action OnGameStarted;
     internal event Action OnSpinClicked;
     internal event Action OnAutoSpinClicked;
     internal event Action OnAutoSpinStopClicked;
@@ -43,7 +44,9 @@ public class GameManager : MonoBehaviour
 
     #region SERIALIZED_ARRAYS_AND_LISTS
     [SerializeField]
-    private List<GameObject> m_Initial_Animation;
+    private List<GameObject> m_Initial_Animation = new List<GameObject>();
+    [SerializeField]
+    private List<int> m_Multiplier_Bet = new List<int>();
     #endregion
 
     private Coroutine M_Initial_Animation = null;
@@ -55,6 +58,7 @@ public class GameManager : MonoBehaviour
     {
         OnFreeSpinReceived += FreeSpinAction;
         OnFreeSpinEnded += FreeSpinStopAction;
+        OnGameStarted += delegate { InitialSetup(); InitiateButtons(); SetBetMultiplier(); };
     }
 
     private void Awake()
@@ -63,12 +67,12 @@ public class GameManager : MonoBehaviour
         M_Initial_Animation = StartCoroutine(InitialAnimation());
     }
 
-    private void Start()
-    {
-        InitialSetup();
+    //private void Start()
+    //{
+    //    InitialSetup();
 
-        InitiateButtons();
-    }
+    //    InitiateButtons();
+    //}
 
     private void InitialSetup()
     {
@@ -81,7 +85,11 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_spin).onClick.AddListener(delegate { OnSpinClicked?.Invoke(); });
 
         m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(delegate { OnBetButtonClicked?.Invoke(); });
+        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(delegate
+        {
+            OnBetButtonClicked?.Invoke();
+            SetBetMultiplier();
+        });
 
         m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.AddListener(delegate { OnAutoSpinClicked?.Invoke(); });
@@ -105,10 +113,10 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_info).onClick.AddListener(OnInfoButtonClicked);
 
         m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.AddListener(delegate { ExitPopup("music"); });
+        m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.AddListener(delegate { ClosePopup("music"); });
 
         m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ExitPopup("info"); });
+        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ClosePopup("info"); });
 
         m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.AddListener(AutoSpinSettingsConfig);
@@ -140,7 +148,7 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.AddListener(delegate
         {
-            ExitPopup("quit");
+            ClosePopup("quit");
         });
     }
 
@@ -175,10 +183,26 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(.2f);
         yield return new WaitUntil(() => m_SocketManager.isLoaded);
 
+        OnGameStarted?.Invoke();
+
         //m_UIManager.GetGameObject(m_Key.m_object_start_animation_panel).SetActive(false);
         m_UIManager.GetGameObject(m_Key.m_object_game_buttons_panel).SetActive(true);
 
         StopCoroutine(M_Initial_Animation);
+    }
+
+    internal void SetBetMultiplier()
+    {
+        m_UIManager.GetText(m_Key.m_text_tripple_7_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[0]).ToString();
+        m_UIManager.GetText(m_Key.m_text_double_7_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[1]).ToString();
+        m_UIManager.GetText(m_Key.m_text_single_7_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[2]).ToString();
+        m_UIManager.GetText(m_Key.m_text_double_bar_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[3]).ToString();
+        m_UIManager.GetText(m_Key.m_text_single_bar_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[4]).ToString();
+        m_UIManager.GetText(m_Key.m_text_double_dollar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[5]).ToString();
+        m_UIManager.GetText(m_Key.m_text_single_dollar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[6]).ToString();
+        m_UIManager.GetText(m_Key.m_text_any_7).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[7]).ToString();
+        m_UIManager.GetText(m_Key.m_text_any_bar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[8]).ToString();
+        m_UIManager.GetText(m_Key.m_text_any).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[9]).ToString();
     }
 
     // This is the method use to trigger and off the turbo spin
@@ -270,7 +294,7 @@ public class GameManager : MonoBehaviour
         m_SettingsClicked = !m_SettingsClicked;
     }
 
-    private void ExitPopup(string m_Config_String)
+    private void ClosePopup(string m_Config_String)
     {
         switch (m_Config_String)
         {
@@ -308,7 +332,7 @@ public class GameManager : MonoBehaviour
 
     private void AutoSpinSettingsConfig()
     {
-        ExitPopup("music");
+        ClosePopup("music");
     }
 
     private void AutoSpinPlusMinus(bool m_config)
@@ -360,7 +384,7 @@ public class GameManager : MonoBehaviour
         m_IsExit = true;
         Debug.Log(string.Concat("<color=yellow><b>", "Exited Broo See You Next Time...", "</b></color>"));
         m_SlotBehaviour.CallCloseSocket();
-        //Application.ExternalCall("window.parent.postMessage", "onExit", "*");
+        Application.ExternalCall("window.parent.postMessage", "onExit", "*");
     }
 }
 
