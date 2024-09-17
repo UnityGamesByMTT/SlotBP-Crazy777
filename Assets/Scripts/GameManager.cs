@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     protected internal bool TurboSpin = false;
     [SerializeField]
     protected internal bool DemoFreeSpin = false;
+    [SerializeField]
+    protected internal bool m_IsExit = false;
     #endregion
 
     #region SERIALIZED_INTEGERS
@@ -125,6 +127,21 @@ public class GameManager : MonoBehaviour
 
         m_UIManager.GetButton(m_Key.m_button_music_off).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_music_off).onClick.AddListener(OnMusicButtonClicked);
+
+        m_UIManager.GetButton(m_Key.m_button_game_exit).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_game_exit).onClick.AddListener(delegate
+        {
+            OpenPopup("quit");
+        });
+
+        m_UIManager.GetButton(m_Key.m_button_quit_yes).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_quit_yes).onClick.AddListener(CallOnExitFunction);
+
+        m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.AddListener(delegate
+        {
+            ExitPopup("quit");
+        });
     }
 
     private IEnumerator InitialAnimation()
@@ -220,15 +237,13 @@ public class GameManager : MonoBehaviour
     private void OnInfoButtonClicked()
     {
         DeanimateInfoMusicButton();
-        m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(true);
-        m_UIManager.GetGameObject(m_Key.m_object_paytable_popup).SetActive(true);
+        OpenPopup("info");
     }
 
     private void OnSettingButtonClicked()
     {
         DeanimateInfoMusicButton();
-        m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(true);
-        m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(true);
+        OpenPopup("music");
     }
 
     private void OnDisable()
@@ -261,13 +276,34 @@ public class GameManager : MonoBehaviour
         {
             case "info":
                 m_UIManager.GetGameObject(m_Key.m_object_paytable_popup).SetActive(false);
-                m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(false);
                 break;
             case "music":
                 m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(false);
-                m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(false);
+                break;
+            case "quit":
+                m_UIManager.GetGameObject(m_Key.m_object_quit_popup).SetActive(false);
                 break;
         }
+
+        m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(false);
+    }
+
+    private void OpenPopup(string m_Config_String)
+    {
+        switch (m_Config_String)
+        {
+            case "info":
+                m_UIManager.GetGameObject(m_Key.m_object_paytable_popup).SetActive(true);
+                break;
+            case "music":
+                m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(true);
+                break;
+            case "quit":
+                m_UIManager.GetGameObject(m_Key.m_object_quit_popup).SetActive(true);
+                break;
+        }
+
+        m_UIManager.GetGameObject(m_Key.m_object_popup_panel).SetActive(true);
     }
 
     private void AutoSpinSettingsConfig()
@@ -317,6 +353,14 @@ public class GameManager : MonoBehaviour
     {
         AutoSpin_Count = 10;
         m_UIManager.GetText(m_Key.m_text_total_auto_spin).text = AutoSpin_Count.ToString();
+    }
+
+    private void CallOnExitFunction()
+    {
+        m_IsExit = true;
+        Debug.Log(string.Concat("<color=yellow><b>", "Exited Broo See You Next Time...", "</b></color>"));
+        m_SlotBehaviour.CallCloseSocket();
+        //Application.ExternalCall("window.parent.postMessage", "onExit", "*");
     }
 }
 

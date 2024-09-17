@@ -354,7 +354,7 @@ public class SlotBehaviour : MonoBehaviour
         ClearAllImageAnimations();
         ResetSlotAnimations();
         m_Bonus_Found = false;
-        //m_Speed_Control = 0.2f;
+        m_Speed_Control = 0.4f;
 
         // Display the normal win line and hide the animated win line
         m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(true);
@@ -431,13 +431,14 @@ public class SlotBehaviour : MonoBehaviour
         AssignResultSpritesWin(simulatedResultReel); // Assign the simulated results to the slot and bonus slots
         #endregion
 
+        //HACK: Code for the delay between the start and stop tweening routines
         if (m_GameManager.TurboSpin)
         {
             yield return new WaitForSeconds(0f);
         }
         else
         {
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(0.5f);
         }
 
         // Stop all tweens running for each slot
@@ -591,7 +592,7 @@ public class SlotBehaviour : MonoBehaviour
                     if (CheckCombo(result_reel))
                     {
                         m_Bonus_Found = true;
-                        //m_Speed_Control = 0.01f;
+                        m_Speed_Control = 0.4f;
 
                         m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(false);
                         m_UIManager.GetGameObject(m_Key.m_object_animated_win_line).SetActive(true);
@@ -610,7 +611,7 @@ public class SlotBehaviour : MonoBehaviour
             if (CheckCombo(result_reel))
             {
                 m_Bonus_Found = true;
-                //m_Speed_Control = 0.01f;
+                m_Speed_Control = 0.4f;
             }
 
             m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(false);
@@ -926,7 +927,17 @@ public class SlotBehaviour : MonoBehaviour
     private IEnumerator StopTweening(int reqpos, Transform slotTransform, int index, int m_StopPos)
     {
         alltweens[index].Pause();
-        alltweens[index].OnComplete(() => { StopTween(index, reqpos, slotTransform, m_StopPos); });
+        //StopTween(index, reqpos, slotTransform, m_StopPos);
+        int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor));
+        if (m_GameManager.TurboSpin)
+        {
+            alltweens[index] = slotTransform.DOLocalMoveY((tweenpos - (94 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.1f).SetEase(Ease.OutElastic);
+        }
+        else
+        {
+            alltweens[index] = slotTransform.DOLocalMoveY((tweenpos - (94 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), m_Speed_Control).SetEase(Ease.OutElastic);
+            Debug.Log((tweenpos - (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0));
+        }
         yield return new WaitForSeconds(0.25f);
     }
 

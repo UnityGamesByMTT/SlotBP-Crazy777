@@ -44,6 +44,7 @@ public class ImageAnimation : MonoBehaviour
 		{
 			Instance = this;
 		}
+		rendererDelegate = GetComponent<Image>();
 	}
 
 	private void OnEnable()
@@ -60,7 +61,7 @@ public class ImageAnimation : MonoBehaviour
 		StopAnimation();
 	}
 
-	private void AnimationProcess()
+    private void AnimationProcess()
 	{
 		SetTextureOfIndex();
 		indexOfTexture++;

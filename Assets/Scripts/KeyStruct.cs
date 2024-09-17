@@ -18,6 +18,9 @@ public class KeyStruct
     internal string m_auto_spin_setting_done = "AutoSpinSetting_Done";
     internal string m_button_music_on = "Music_On";
     internal string m_button_music_off = "Music_Off";
+    internal string m_button_game_exit = "Exit_Game";
+    internal string m_button_quit_yes = "Quit_Yes";
+    internal string m_button_quit_no = "Quit_No";
     #endregion
 
     #region TEXT_REFERENCES_KEY
@@ -78,5 +81,6 @@ public class KeyStruct
     internal string m_object_game_buttons_panel = "Game_Buttons_Panel";
     internal string m_object_start_animation_panel = "Start_Animation_Panel";
     internal string m_object_music_button_holder = "Music_Button_Holder";
+    internal string m_object_quit_popup = "Quit_Popup";
     #endregion
 }
