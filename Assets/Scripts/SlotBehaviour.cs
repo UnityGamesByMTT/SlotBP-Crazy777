@@ -106,6 +106,9 @@ public class SlotBehaviour : MonoBehaviour
     Coroutine FreeSpinRoutine = null;
     #endregion
 
+    #region Audio Sources
+    #endregion
+    private AudioSource m_TempAudioPlayBack;
     #endregion
 
     [SerializeField]
@@ -184,7 +187,7 @@ public class SlotBehaviour : MonoBehaviour
 
     private void StartSlots(bool autoSpin = false)
     {
-        if (audioController) audioController.PlaySpinButtonAudio();
+        //if (audioController) audioController.PlaySpinButtonAudio();
 
         if (!autoSpin)
         {
@@ -208,7 +211,7 @@ public class SlotBehaviour : MonoBehaviour
 
     private void AutoSpin()
     {
-        if (audioController) audioController.PlaySpinButtonAudio();
+        //if (audioController) audioController.PlaySpinButtonAudio();
 
         m_GameManager.AutoSpin_Count = int.Parse(m_UIManager.GetText(m_Key.m_text_total_auto_spin).text);
 
@@ -229,7 +232,7 @@ public class SlotBehaviour : MonoBehaviour
 
     private void StopAutoSpin()
     {
-        if (audioController) audioController.PlaySpinButtonAudio();
+        //if (audioController) audioController.PlaySpinButtonAudio();
 
         if (IsAutoSpin)
         {
@@ -286,7 +289,7 @@ public class SlotBehaviour : MonoBehaviour
 
     private void OnBetOne()
     {
-        if (audioController) audioController.PlayButtonAudio();
+        //if (audioController) audioController.PlayButtonAudio();
 
         if (BetCounter < SocketManager.initialData.Bets.Count - 1)
         {
@@ -309,16 +312,16 @@ public class SlotBehaviour : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_spin).interactable = true;
     }
 
-    private void OnApplicationFocus(bool focus)
-    {
-        if (focus)
-        {
-            if (!IsSpinning)
-            {
-                if (audioController) audioController.StopWLAaudio();
-            }
-        }
-    }
+    //private void OnApplicationFocus(bool focus)
+    //{
+    //    if (focus)
+    //    {
+    //        if (!IsSpinning)
+    //        {
+    //            if (audioController) audioController.StopWLAaudio();
+    //        }
+    //    }
+    //}
 
     #region FREE SPIN
 
@@ -326,6 +329,7 @@ public class SlotBehaviour : MonoBehaviour
     {
         if (!IsFreeSpin)
         {
+            audioController.m_FreeSpin_Audio.Play();
             IsFreeSpin = true;
             ToggleButtonGrp(false);
 
@@ -366,7 +370,7 @@ public class SlotBehaviour : MonoBehaviour
         ResetSlotAnimations();
         m_Bonus_Found = false;
         WinLine = false;
-        m_Speed_Control = 0.4f;
+        m_Speed_Control = 0.5f;
 
         // Display the normal win line and hide the animated win line
         m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(true);
@@ -382,10 +386,10 @@ public class SlotBehaviour : MonoBehaviour
         }
 
         // Play the spin audio if the audio controller is available
-        if (audioController)
-        {
-            audioController.PlayWLAudio("spin");
-        }
+        //if (audioController)
+        //{
+        //    audioController.PlayWLAudio("spin");
+        //}
 
         // Set spinning state to true and disable buttons during the spin
         IsSpinning = true;
@@ -558,23 +562,18 @@ public class SlotBehaviour : MonoBehaviour
             {
                 if (!IsFreeSpin)
                 {
-                    Tempimages[j].slotImages[0].sprite = myImages[m_slot_values[j]];
+                    //if (Tempimages[j - 1].slotImages[0].sprite) Tempimages[j - 1].slotImages[0].sprite = myImages[SocketManager.resultData.resultSymbols[0][j]];
+                    Tempimages[j].slotImages[1].sprite = myImages[m_slot_values[j]];
+                    //if (Tempimages[j + 1].slotImages[2].sprite) Tempimages[j + 1].slotImages[0].sprite = myImages[SocketManager.resultData.resultSymbols[0][j]];
                 }
                 else
                 {
                     if(j < m_slot_values.Count - 1)
                     {
-                        Tempimages[j].slotImages[0].sprite = myImages[m_slot_values[j]];
+                        Tempimages[j].slotImages[1].sprite = myImages[m_slot_values[j]];
                     }
                 }
             }
-            //else
-            //{
-            //    if (!IsFreeSpin)
-            //    {
-            //        Tempimages[j].slotImages[0].sprite = myImages[UnityEngine.Random.Range(1, myImages.Length-1)];
-            //    }
-            //}
         }
 
         CheckWin(m_slot_values);
@@ -608,14 +607,15 @@ public class SlotBehaviour : MonoBehaviour
                 if ((zero_count - 1) == 0)
                 {
                     // HACK: That means except bonus section there are no zeros in slot section so play the combo animations for slots
-                    PlaySpriteAnimation(false, result_reel);
+                    PlaySpriteAnimation(false, result_reel, audioController.m_Win_Audio);
                     if (CheckCombo(result_reel))
                     {
                         m_Bonus_Found = true;
-                        m_Speed_Control = 0.4f;
+                        m_Speed_Control = 0.5f;
 
                         
-                        PlaySpriteAnimation(true, result_reel);
+                        PlaySpriteAnimation(true, result_reel, audioController.m_Win_Audio);
+                        //audioController.m_Win_Audio.Play();
                     }
                 }
             }
@@ -629,10 +629,11 @@ public class SlotBehaviour : MonoBehaviour
             if (CheckCombo(result_reel))
             {
                 m_Bonus_Found = true;
-                m_Speed_Control = 0.2f;
+                m_Speed_Control = 0.1f;
             }
 
-            PlaySpriteAnimation(true, result_reel);
+            PlaySpriteAnimation(true, result_reel, audioController.m_Bonus_Audio);
+            //audioController.m_Bonus_Audio.Play();
         }
     }
 
@@ -665,7 +666,7 @@ public class SlotBehaviour : MonoBehaviour
         else return false;
     }
 
-    private void PlaySpriteAnimation(bool m_config, List<int> m_reel)
+    private void PlaySpriteAnimation(bool m_config, List<int> m_reel, AudioSource m_play_audio)
     {
         for(int i = 0; i < m_reel.Count; i++)
         {
@@ -673,14 +674,14 @@ public class SlotBehaviour : MonoBehaviour
             {
                 if (i < m_reel.Count - 1)
                 {
-                    ImageAnimation m_anim_obj = Tempimages[i].slotImages[0].gameObject.GetComponent<ImageAnimation>();
-                    SlotAnimationsSwitch(true, m_reel[i], m_anim_obj);
+                    ImageAnimation m_anim_obj = Tempimages[i].slotImages[1].gameObject.GetComponent<ImageAnimation>();
+                    SlotAnimationsSwitch(true, m_reel[i], m_anim_obj, m_play_audio);
                     Debug.Log(string.Concat("<color=cyan><b>", "Bonus Available...", "</b></color>"));
                 }
                 else if(i == m_reel.Count - 1)
                 {
-                    ImageAnimation m_anim_obj = Tempimages[i].slotImages[0].gameObject.GetComponent<ImageAnimation>();
-                    SlotAnimationsSwitch(false, m_reel[i], m_anim_obj);
+                    ImageAnimation m_anim_obj = Tempimages[i].slotImages[1].gameObject.GetComponent<ImageAnimation>();
+                    SlotAnimationsSwitch(false, m_reel[i], m_anim_obj, m_play_audio);
                     Debug.Log(string.Concat("<color=green><b>", "Bonus Found...", "</b></color>"));
                 }
             }
@@ -688,8 +689,8 @@ public class SlotBehaviour : MonoBehaviour
             {
                 if (i < m_reel.Count - 1)
                 {
-                    ImageAnimation m_anim_obj = Tempimages[i].slotImages[0].gameObject.GetComponent<ImageAnimation>();
-                    SlotAnimationsSwitch(true, m_reel[i], m_anim_obj);
+                    ImageAnimation m_anim_obj = Tempimages[i].slotImages[1].gameObject.GetComponent<ImageAnimation>();
+                    SlotAnimationsSwitch(true, m_reel[i], m_anim_obj, m_play_audio);
                     Debug.Log(string.Concat("<color=cyan><b>", "Bonus Not Found...", "</b></color>"));
                 }
             }
@@ -698,7 +699,7 @@ public class SlotBehaviour : MonoBehaviour
         WinLine = true;
     }
 
-    private void SlotAnimationsSwitch(bool m_config_slot_bonus, int slot_id, ImageAnimation m_anim_object)
+    private void SlotAnimationsSwitch(bool m_config_slot_bonus, int slot_id, ImageAnimation m_anim_object, AudioSource m_play_audio)
     {
         // If Slots
         if (m_config_slot_bonus)
@@ -845,6 +846,8 @@ public class SlotBehaviour : MonoBehaviour
                     break;
             }
         }
+
+        m_TempAudioPlayBack = m_play_audio;
     }
 
     private void StartSlotAnimations()
@@ -856,6 +859,7 @@ public class SlotBehaviour : MonoBehaviour
         if (WinLine)
         {
             PlayWinLineAnimation(true);
+            m_TempAudioPlayBack.Play();
             m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(false);
         }
     }
@@ -953,7 +957,7 @@ public class SlotBehaviour : MonoBehaviour
         }
         else
         {
-            tweener = slotTransform.DOLocalMoveY(tweenHeight, m_Speed_Control * 2).SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear).SetDelay(0);
+            tweener = slotTransform.DOLocalMoveY(tweenHeight, 0.8f).SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear).SetDelay(0);
         }
 
         tweener.Play();
@@ -962,19 +966,24 @@ public class SlotBehaviour : MonoBehaviour
 
     private IEnumerator StopTweening(int reqpos, Transform slotTransform, int index, int m_StopPos)
     {
-        alltweens[index].Pause();
-        //StopTween(index, reqpos, slotTransform, m_StopPos);
-        int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor));
+        bool IsRegister = false;
+        yield return alltweens[index].OnStepComplete(delegate { IsRegister = true; });
+        yield return new WaitUntil(() => IsRegister);
+        alltweens[index].Kill();
+        //alltweens[index].Pause();
+        int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor)) - 20;
         if (m_GameManager.TurboSpin)
         {
-            alltweens[index] = slotTransform.DOLocalMoveY((tweenpos - (94 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.1f).SetEase(Ease.OutElastic);
+            alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.4f).SetEase(Ease.OutQuad);
         }
         else
         {
-            alltweens[index] = slotTransform.DOLocalMoveY((tweenpos - (94 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), m_Speed_Control * 2).SetEase(Ease.OutElastic);
+            alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.6f).SetEase(Ease.OutQuad);
             Debug.Log((tweenpos - (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0));
         }
-        yield return new WaitForSeconds(0.5f);
+        //yield return new WaitForSeconds(0.5f);
+        yield return alltweens[index].WaitForCompletion();
+        alltweens[index].Kill();
     }
 
     private void KillAllTweens()
@@ -992,8 +1001,8 @@ public class SlotBehaviour : MonoBehaviour
     {
         foreach(var i in Tempimages)
         {
-            if(i.slotImages[0].GetComponent<ImageAnimation>())
-                i.slotImages[0].GetComponent<ImageAnimation>().StopAnimation();
+            if(i.slotImages[1].GetComponent<ImageAnimation>())
+                i.slotImages[1].GetComponent<ImageAnimation>().StopAnimation();
         }
     }
 

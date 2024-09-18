@@ -226,7 +226,6 @@ public class SocketIOManager : MonoBehaviour
     {
         Debug.Log(string.Concat("<color=cyan><b>From SocketManager: ", jsonObject, "</b></color>"));
         Root myData = JsonConvert.DeserializeObject<Root>(jsonObject);
-
         string id = myData.id;
 
         switch (id)
@@ -330,7 +329,7 @@ public class SocketIOManager : MonoBehaviour
             if (json != null)
             {
                 this.manager.Socket.Emit(eventName, json);
-                Debug.Log("JSON data sent: " + json);
+                Debug.Log(string.Concat("<color=yellow><b>", "JSON data sent: " + json, "</b></color>"));
             }
             else
             {

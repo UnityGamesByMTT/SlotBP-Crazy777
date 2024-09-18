@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using DG.Tweening;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class GameManager : MonoBehaviour
     private SlotBehaviour m_SlotBehaviour;
     [SerializeField]
     private SocketIOManager m_SocketManager;
+    [SerializeField]
+    private AudioController m_AudioController;
     #endregion
 
     #region SERIALIZED_BOOLEANS
@@ -49,6 +52,8 @@ public class GameManager : MonoBehaviour
     private List<int> m_Multiplier_Bet = new List<int>();
     #endregion
 
+    [SerializeField] private Button[] m_Bet_Buttons;
+
     private Coroutine M_Initial_Animation = null;
     private bool m_SettingsClicked = false;
 
@@ -58,7 +63,14 @@ public class GameManager : MonoBehaviour
     {
         OnFreeSpinReceived += FreeSpinAction;
         OnFreeSpinEnded += FreeSpinStopAction;
-        OnGameStarted += delegate { InitialSetup(); InitiateButtons(); SetBetMultiplier(); };
+        OnGameStarted += delegate
+        {
+            InitialSetup();
+            InitiateButtons();
+            SetBetMultiplier();
+            BetButtonAssignClick();
+            m_AudioController.InitialAudioSetup();
+        };
     }
 
     private void Awake()
@@ -82,74 +94,64 @@ public class GameManager : MonoBehaviour
     private void InitiateButtons()
     {
         m_UIManager.GetButton(m_Key.m_button_spin).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_spin).onClick.AddListener(delegate { OnSpinClicked?.Invoke(); });
+        m_UIManager.GetButton(m_Key.m_button_spin).onClick.AddListener(delegate { OnSpinClicked?.Invoke(); m_AudioController.m_Spin_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(delegate
-        {
-            OnBetButtonClicked?.Invoke();
-            SetBetMultiplier();
-        });
+        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(delegate { OnBetButtonClicked?.Invoke(); SetBetMultiplier(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.AddListener(delegate { OnAutoSpinClicked?.Invoke(); });
+        m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.AddListener(delegate { OnAutoSpinClicked?.Invoke(); m_AudioController.m_Spin_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_auto_spin_stop).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_auto_spin_stop).onClick.AddListener(delegate { OnAutoSpinStopClicked?.Invoke(); });
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_stop).onClick.AddListener(delegate { OnAutoSpinStopClicked?.Invoke(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_turbo_spin).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_turbo_spin).onClick.AddListener(TurboSpinClickedAction);
+        m_UIManager.GetButton(m_Key.m_button_turbo_spin).onClick.AddListener(delegate { TurboSpinClickedAction(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_turbo_spin_stop).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_turbo_spin_stop).onClick.AddListener(TurboSpinClickedAction);
+        m_UIManager.GetButton(m_Key.m_button_turbo_spin_stop).onClick.AddListener(delegate { TurboSpinClickedAction(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_settings).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_settings).onClick.AddListener(SettingsButtonClickedAction);
+        m_UIManager.GetButton(m_Key.m_button_settings).onClick.AddListener(delegate { SettingsButtonClickedAction(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_music).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music).onClick.AddListener(OnSettingButtonClicked);
+        m_UIManager.GetButton(m_Key.m_button_music).onClick.AddListener(delegate { OnSettingButtonClicked(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_info).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_info).onClick.AddListener(OnInfoButtonClicked);
+        m_UIManager.GetButton(m_Key.m_button_info).onClick.AddListener(delegate { OnInfoButtonClicked(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.AddListener(delegate { ClosePopup("music"); });
+        m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.AddListener(delegate { ClosePopup("music"); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ClosePopup("info"); });
+        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ClosePopup("info"); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.AddListener(AutoSpinSettingsConfig);
+        m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.AddListener(delegate { AutoSpinSettingsConfig(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_auto_spin_plus).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_auto_spin_plus).onClick.AddListener(delegate { AutoSpinPlusMinus(true); });
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_plus).onClick.AddListener(delegate { AutoSpinPlusMinus(true); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_auto_spin_minus).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_auto_spin_minus).onClick.AddListener(delegate { AutoSpinPlusMinus(false); });
+        m_UIManager.GetButton(m_Key.m_button_auto_spin_minus).onClick.AddListener(delegate { AutoSpinPlusMinus(false); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_max_auto_spin).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_max_auto_spin).onClick.AddListener(AutoSpinMax);
+        m_UIManager.GetButton(m_Key.m_button_max_auto_spin).onClick.AddListener(delegate { AutoSpinMax(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_music_on).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music_on).onClick.AddListener(OnMusicButtonClicked);
+        m_UIManager.GetButton(m_Key.m_button_music_on).onClick.AddListener(delegate { OnMusicButtonClicked(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_music_off).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_music_off).onClick.AddListener(OnMusicButtonClicked);
+        m_UIManager.GetButton(m_Key.m_button_music_off).onClick.AddListener(delegate { OnMusicButtonClicked(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_game_exit).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_game_exit).onClick.AddListener(delegate
-        {
-            OpenPopup("quit");
-        });
+        m_UIManager.GetButton(m_Key.m_button_game_exit).onClick.AddListener(delegate { OpenPopup("quit"); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_quit_yes).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_quit_yes).onClick.AddListener(CallOnExitFunction);
+        m_UIManager.GetButton(m_Key.m_button_quit_yes).onClick.AddListener(delegate { CallOnExitFunction(); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.AddListener(delegate
-        {
-            ClosePopup("quit");
-        });
+        m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.AddListener(delegate { ClosePopup("quit"); m_AudioController.m_Click_Audio.Play(); });
     }
 
     private IEnumerator InitialAnimation()
@@ -203,6 +205,14 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetText(m_Key.m_text_any_7).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[7]).ToString();
         m_UIManager.GetText(m_Key.m_text_any_bar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[8]).ToString();
         m_UIManager.GetText(m_Key.m_text_any).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[9]).ToString();
+    }
+
+    private void BetButtonAssignClick()
+    {
+        for(int i = 0; i < m_SocketManager.initialData.Bets.Count; i++)
+        {
+            m_Bet_Buttons[i].transform.GetChild(2).GetComponent<TMP_Text>().text = (m_SocketManager.initialData.Bets[i] * 3).ToString();
+        }
     }
 
     // This is the method use to trigger and off the turbo spin
@@ -268,12 +278,6 @@ public class GameManager : MonoBehaviour
     {
         DeanimateInfoMusicButton();
         OpenPopup("music");
-    }
-
-    private void OnDisable()
-    {
-        OnFreeSpinReceived -= FreeSpinAction;
-        OnFreeSpinEnded -= FreeSpinStopAction;
     }
 
     private void AnimateInfoMusicButton()
@@ -363,11 +367,13 @@ public class GameManager : MonoBehaviour
         GameObject m_music_obj = m_UIManager.GetButton(m_Key.m_button_music_on).gameObject;
         if (m_music_obj.activeSelf)
         {
+            m_AudioController.ToggleMute(true);
             m_music_obj.SetActive(false);
             m_UIManager.GetButton(m_Key.m_button_music_off).gameObject.SetActive(true);
         }
         else
         {
+            m_AudioController.ToggleMute(false);
             m_music_obj.SetActive(true);
             m_UIManager.GetButton(m_Key.m_button_music_off).gameObject.SetActive(false);
         }
@@ -385,6 +391,19 @@ public class GameManager : MonoBehaviour
         Debug.Log(string.Concat("<color=yellow><b>", "Exited Broo See You Next Time...", "</b></color>"));
         m_SlotBehaviour.CallCloseSocket();
         Application.ExternalCall("window.parent.postMessage", "onExit", "*");
+    }
+
+    private void OnDisable()
+    {
+        OnFreeSpinReceived -= FreeSpinAction;
+        OnFreeSpinEnded -= FreeSpinStopAction;
+        OnGameStarted -= delegate
+        {
+            InitialSetup();
+            InitiateButtons();
+            SetBetMultiplier();
+            m_AudioController.InitialAudioSetup();
+        };
     }
 }
 
