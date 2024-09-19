@@ -454,8 +454,8 @@ public class SlotBehaviour : MonoBehaviour
         {
             simulatedResultReel.Add(m);
         }
-        Debug.Log(string.Concat("<color=green>From Slot Machine: ", string.Join(", ", simulatedResultReel),"</color>"));
         Debug.Log(string.Concat("<color=green>From Slot Machine: ", string.Join(", ", SocketManager.resultData.resultSymbols[0]), "</color>"));
+        Debug.Log(string.Concat("<color=green>From Slot Machine: ", string.Join(", ", simulatedResultReel),"</color>"));
         Debug.Log(string.Concat("<color=green>From Slot Machine: ", string.Join(", ", SocketManager.resultData.resultSymbols[2]), "</color>"));
         AssignResultSpritesWin(SocketManager.resultData.resultSymbols[1], SocketManager.resultData.resultSymbols[0], SocketManager.resultData.resultSymbols[2]); // Assign the simulated results to the slot and bonus slots
         #endregion
@@ -563,9 +563,9 @@ public class SlotBehaviour : MonoBehaviour
         for (int j = 0; j < m_slot_values_mid.Count; j++)
         {
             Tempimages[j].slotImages[0].sprite = myImages[m_slot_value_upper[j]];
-            Debug.Log(m_slot_value_upper[j]);
+            //Debug.Log(m_slot_value_upper[j]);
             Tempimages[j].slotImages[2].sprite = myImages[m_slot_value_lower[j]];
-            Debug.Log(m_slot_value_lower[j]);
+            //Debug.Log(m_slot_value_lower[j]);
 
             if (m_slot_values_mid[j] != 0)
             {
@@ -684,13 +684,13 @@ public class SlotBehaviour : MonoBehaviour
                 {
                     ImageAnimation m_anim_obj = Tempimages[i].slotImages[1].gameObject.GetComponent<ImageAnimation>();
                     SlotAnimationsSwitch(true, m_reel[i], m_anim_obj, m_play_audio);
-                    Debug.Log(string.Concat("<color=cyan><b>", "Bonus Available...", "</b></color>"));
+                    //Debug.Log(string.Concat("<color=cyan><b>", "Bonus Available...", "</b></color>"));
                 }
                 else if(i == m_reel.Count - 1)
                 {
                     ImageAnimation m_anim_obj = Tempimages[i].slotImages[1].gameObject.GetComponent<ImageAnimation>();
                     SlotAnimationsSwitch(false, m_reel[i], m_anim_obj, m_play_audio);
-                    Debug.Log(string.Concat("<color=green><b>", "Bonus Found...", "</b></color>"));
+                    //Debug.Log(string.Concat("<color=green><b>", "Bonus Found...", "</b></color>"));
                 }
             }
             else
@@ -806,7 +806,7 @@ public class SlotBehaviour : MonoBehaviour
         // If Bonus
         else
         {
-            Debug.Log(string.Concat("<color=yellow><b>", "Bonus Called", "</b></color>"));
+            //Debug.Log(string.Concat("<color=yellow><b>", "Bonus Called", "</b></color>"));
             ImageAnimation m_anim;
             switch (slot_id)
             {
@@ -992,7 +992,7 @@ public class SlotBehaviour : MonoBehaviour
         else
         {
             alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.6f).SetEase(Ease.OutQuad);
-            Debug.Log((tweenpos - (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0));
+            //Debug.Log((tweenpos - (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0));
         }
         //yield return new WaitForSeconds(0.5f);
         yield return alltweens[index].WaitForCompletion();

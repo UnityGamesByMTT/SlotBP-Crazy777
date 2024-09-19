@@ -32,9 +32,6 @@ public class SocketIOManager : MonoBehaviour
     internal List<string> bonusdata = null;
     private SocketManager manager;
 
-    [SerializeField]
-    internal JSHandler _jsManager;
-
     protected string SocketURI = null;
     protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/";
 
@@ -238,7 +235,7 @@ public class SocketIOManager : MonoBehaviour
                     //bonusdata = myData.message.BonusData;
                     if (!SetInit)
                     {
-                        Debug.Log(jsonObject);
+                        //Debug.Log(jsonObject);
                         //List<string> InitialReels = ConvertListOfListsToStrings(initUIData.paylines.symbols);
                         List<string> InitialReels = GetReelList(initUIData.paylines.symbols);
                         InitialReels = RemoveQuotes(InitialReels);
@@ -284,11 +281,11 @@ public class SocketIOManager : MonoBehaviour
         slotManager.shuffleInitialMatrix();
 
         Debug.Log(string.Concat("<color=blue><b>", LineIds.Count, "</b></color>"));
-        for (int i = 0; i < LineIds.Count; i++)
-        {
-            //slotManager.FetchLines(LineIds[i], i);
-            Debug.Log(string.Concat("<color=green><b>", i, "</b></color>"));
-        }
+        //for (int i = 0; i < LineIds.Count; i++)
+        //{
+        //    //slotManager.FetchLines(LineIds[i], i);
+        //    Debug.Log(string.Concat("<color=green><b>", i, "</b></color>"));
+        //}
 
         slotManager.SetInitialUI();
 

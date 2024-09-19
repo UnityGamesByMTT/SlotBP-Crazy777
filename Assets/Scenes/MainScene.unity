@@ -34642,7 +34642,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1736793184}
   - component: {fileID: 1736793185}
-  - component: {fileID: 1736793186}
   m_Layer: 0
   m_Name: SocketManager
   m_TagString: Untagged
@@ -34680,20 +34679,7 @@ MonoBehaviour:
   slotManager: {fileID: 1021465155}
   uiManager: {fileID: 328257257}
   bonusdata: []
-  _jsManager: {fileID: 1736793186}
   testToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDgzZDdkYTI3YmY5MDI0NDNlYjRkZSIsInVzZXJuYW1lIjoiZGFyc2hhbiIsInJvbGUiOiJwbGF5ZXIiLCJpYXQiOjE3MjY1NjQwNTAsImV4cCI6MTcyNzE2ODg1MH0.HgMBMJixClWehQbtUQ7GOxZpX2dWn6FcEaLxT1oPKA4
---- !u!114 &1736793186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1736793183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 253bf97e4555c4bd0b0dc3e471a2f899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1740615999
 GameObject:
   m_ObjectHideFlags: 0
