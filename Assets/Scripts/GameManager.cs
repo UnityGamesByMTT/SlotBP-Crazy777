@@ -333,8 +333,8 @@ public class GameManager : MonoBehaviour
 
     private void AnimateInfoMusicButton()
     {
-        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(150f, 0.2f);
-        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+        //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
         m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(50f, 0.2f);
 
         m_SettingsClicked = !m_SettingsClicked;
@@ -343,7 +343,7 @@ public class GameManager : MonoBehaviour
     private void DeanimateInfoMusicButton()
     {
         m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
-        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+        //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
         m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(-15f, 0.2f);
 
         m_SettingsClicked = !m_SettingsClicked;

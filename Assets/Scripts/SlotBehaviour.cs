@@ -422,7 +422,7 @@ public class SlotBehaviour : MonoBehaviour
         if (!IsFreeSpin)
         {
             double initAmount = balance;
-            balance -= bet;
+            initAmount -= bet;
 
             // Tween the balance display to reflect the new balance
             DOTween.To(() => initAmount, (val) => initAmount = val, balance, 0.8f).OnUpdate(() =>
