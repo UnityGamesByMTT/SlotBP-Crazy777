@@ -61,14 +61,24 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        OnFreeSpinReceived += FreeSpinAction;
-        OnFreeSpinEnded += FreeSpinStopAction;
+        OnFreeSpinReceived += delegate
+        {
+            FreeSpinAction();
+            m_UIManager.GetText(m_Key.m_text_free_spin_count).text = m_SocketManager.resultData.freeSpinCount.ToString();
+            m_UIManager.GetGameObject(m_Key.m_object_free_spin_panel).SetActive(true);
+        };
+        OnFreeSpinEnded += delegate
+        {
+            FreeSpinStopAction();
+            m_UIManager.GetGameObject(m_Key.m_object_free_spin_panel).SetActive(false);
+        };
         OnGameStarted += delegate
         {
             InitialSetup();
             InitiateButtons();
-            SetBetMultiplier();
             BetButtonAssignClick();
+            SetBetMultiplier();
+            m_Bet_Buttons[0].Select();
             m_AudioController.InitialAudioSetup();
         };
     }
@@ -97,7 +107,18 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_spin).onClick.AddListener(delegate { OnSpinClicked?.Invoke(); m_AudioController.m_Spin_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(delegate { OnBetButtonClicked?.Invoke(); SetBetMultiplier(); m_AudioController.m_Click_Audio.Play(); });
+        m_UIManager.GetButton(m_Key.m_button_bet_button).onClick.AddListener(delegate
+        {
+            m_AudioController.m_Click_Audio.Play();
+            if (m_UIManager.GetGameObject(m_Key.m_object_bet_panel).activeSelf)
+            {
+                m_UIManager.GetGameObject(m_Key.m_object_bet_panel).SetActive(false);
+            }
+            else
+            {
+                m_UIManager.GetGameObject(m_Key.m_object_bet_panel).SetActive(true);
+            }
+        });
 
         m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_auto_spin).onClick.AddListener(delegate { OnAutoSpinClicked?.Invoke(); m_AudioController.m_Spin_Audio.Play(); });
@@ -209,10 +230,40 @@ public class GameManager : MonoBehaviour
 
     private void BetButtonAssignClick()
     {
-        for(int i = 0; i < m_SocketManager.initialData.Bets.Count; i++)
+        int m_data_count = m_SocketManager.initialData.Bets.Count;
+        for (int i = 0; i < m_Bet_Buttons.Length; i++)
         {
-            m_Bet_Buttons[i].transform.GetChild(2).GetComponent<TMP_Text>().text = (m_SocketManager.initialData.Bets[i] * 3).ToString();
+            Button m_Bet_Button = m_Bet_Buttons[i];
+            if(i < m_data_count)
+            {
+                m_Bet_Button.transform.GetChild(2).GetComponent<TMP_Text>().text = (m_SocketManager.initialData.Bets[i] * 3).ToString();
+                m_Bet_Button.onClick.RemoveAllListeners();
+                m_Bet_Button.onClick.AddListener(()=>
+                {
+                    m_SlotBehaviour.BetCounter = GetBetCounter(m_Bet_Button);
+                    Debug.Log("<color=red>" + m_SlotBehaviour.BetCounter + "</color>");
+                    OnBetButtonClicked?.Invoke();
+                    SetBetMultiplier();
+                    m_AudioController.m_Click_Audio.Play();
+                });
+            }
+            else
+            {
+                m_Bet_Button.gameObject.SetActive(false);
+            }
         }
+    }
+
+    private int GetBetCounter(Button m_Click_Button)
+    {
+        for(int _=0; _<m_Bet_Buttons.Length; _++)
+        {
+            if(m_Bet_Buttons[_] == m_Click_Button)
+            {
+                return _;
+            }
+        }
+        return 0;
     }
 
     // This is the method use to trigger and off the turbo spin
@@ -401,7 +452,9 @@ public class GameManager : MonoBehaviour
         {
             InitialSetup();
             InitiateButtons();
+            BetButtonAssignClick();
             SetBetMultiplier();
+            m_Bet_Buttons[0].Select();
             m_AudioController.InitialAudioSetup();
         };
     }

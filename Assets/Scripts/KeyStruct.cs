@@ -38,6 +38,7 @@ public class KeyStruct
     internal string m_text_any_bar = "AnyBar";
     internal string m_text_any = "Any";
     internal string m_text_total_auto_spin = "TotalAutoSpin";
+    internal string m_text_free_spin_count = "FreeSpinCount";
     #endregion
 
     #region ANIMATED_SPRITES_LIST_KEY
@@ -82,5 +83,7 @@ public class KeyStruct
     internal string m_object_start_animation_panel = "Start_Animation_Panel";
     internal string m_object_music_button_holder = "Music_Button_Holder";
     internal string m_object_quit_popup = "Quit_Popup";
+    internal string m_object_bet_panel = "Bet_Panel";
+    internal string m_object_free_spin_panel = "FreeSpin_Panel";
     #endregion
 }

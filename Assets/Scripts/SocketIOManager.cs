@@ -42,7 +42,7 @@ public class SocketIOManager : MonoBehaviour
     private string testToken;
     internal bool isResultdone = false;
 
-    protected string gameID = "";   //SL-CRZ
+    protected string gameID = "SL-CRZ";   //SL-CRZ
 
     internal bool isLoaded = false;
     internal bool SetInit = false;

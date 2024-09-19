@@ -5,6 +5,7 @@ using System;
 
 public class AudioController : MonoBehaviour
 {
+    [SerializeField] internal AudioListener m_Player_Listener;
     [SerializeField] internal AudioSource m_BG_Audio;
     [SerializeField] internal AudioSource m_Click_Audio;
     [SerializeField] internal AudioSource m_Win_Audio;
@@ -19,6 +20,7 @@ public class AudioController : MonoBehaviour
     {
         m_On_Application_Focus -= delegate
         {
+            m_Player_Listener.enabled = true;
             if (m_BG_Audio) m_BG_Audio.UnPause();
             if (m_Click_Audio) m_Click_Audio.UnPause();
             if (m_Win_Audio) m_Win_Audio.UnPause();
@@ -29,6 +31,7 @@ public class AudioController : MonoBehaviour
 
         m_On_Application_Out_Of_Focus -= delegate
         {
+            m_Player_Listener.enabled = false;
             if (m_BG_Audio) m_BG_Audio.Pause();
             if (m_Click_Audio) m_Click_Audio.Pause();
             if (m_Win_Audio) m_Win_Audio.Pause();
@@ -44,6 +47,7 @@ public class AudioController : MonoBehaviour
 
         m_On_Application_Focus += delegate
         {
+            m_Player_Listener.enabled = true;
             if (m_BG_Audio) m_BG_Audio.UnPause();
             if (m_Click_Audio) m_Click_Audio.UnPause();
             if (m_Win_Audio) m_Win_Audio.UnPause();
@@ -54,6 +58,7 @@ public class AudioController : MonoBehaviour
 
         m_On_Application_Out_Of_Focus += delegate
         {
+            m_Player_Listener.enabled = false;
             if (m_BG_Audio) m_BG_Audio.Pause();
             if (m_Click_Audio) m_Click_Audio.Pause();
             if (m_Win_Audio) m_Win_Audio.Pause();
