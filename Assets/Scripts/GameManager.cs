@@ -77,6 +77,7 @@ public class GameManager : MonoBehaviour
             InitialSetup();
             InitiateButtons();
             BetButtonAssignClick();
+            UpdateDescription();
             SetBetMultiplier();
             m_Bet_Buttons[0].Select();
             m_AudioController.InitialAudioSetup();
@@ -228,6 +229,18 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetText(m_Key.m_text_any).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[9]).ToString();
     }
 
+    private void UpdateDescription()
+    {
+        m_UIManager.GetText(m_Key.m_text_pay_tripple_7).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_double_7).text = m_SocketManager.initUIData.paylines.symbols[2].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_single_7).text = m_SocketManager.initUIData.paylines.symbols[3].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_double_bar).text = m_SocketManager.initUIData.paylines.symbols[4].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_single_bar).text = m_SocketManager.initUIData.paylines.symbols[5].multiplier.ToString();
+        //m_UIManager.GetText(m_Key.m_text_pay_any_7).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+        //m_UIManager.GetText(m_Key.m_text_pay_any_bar).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+        //m_UIManager.GetText(m_Key.m_text_pay_any_symbols).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+    }
+
     private void BetButtonAssignClick()
     {
         int m_data_count = m_SocketManager.initialData.Bets.Count;
@@ -333,8 +346,8 @@ public class GameManager : MonoBehaviour
 
     private void AnimateInfoMusicButton()
     {
-        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(150f, 0.2f);
-        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+        //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
         m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(50f, 0.2f);
 
         m_SettingsClicked = !m_SettingsClicked;
@@ -343,7 +356,7 @@ public class GameManager : MonoBehaviour
     private void DeanimateInfoMusicButton()
     {
         m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
-        m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+        //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
         m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(-15f, 0.2f);
 
         m_SettingsClicked = !m_SettingsClicked;
@@ -453,6 +466,7 @@ public class GameManager : MonoBehaviour
             InitialSetup();
             InitiateButtons();
             BetButtonAssignClick();
+            UpdateDescription();
             SetBetMultiplier();
             m_Bet_Buttons[0].Select();
             m_AudioController.InitialAudioSetup();

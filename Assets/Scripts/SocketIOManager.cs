@@ -290,6 +290,7 @@ public class SocketIOManager : MonoBehaviour
         slotManager.SetInitialUI();
 
         isLoaded = true;
+        Application.ExternalCall("window.parent.postMessage", "OnEnter", "*");
     }
 
     internal void CloseSocket()
