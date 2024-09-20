@@ -5507,6 +5507,24 @@ MonoBehaviour:
     text: {fileID: 1640664506}
   - key: FreeSpinCount
     text: {fileID: 1465437068}
+  - key: '[[===PAYTABLE_DATA===]]'
+    text: {fileID: 0}
+  - key: Pay_Tripple_7
+    text: {fileID: 1095578597}
+  - key: Pay_Double_7
+    text: {fileID: 565842593}
+  - key: Pay_Single_7
+    text: {fileID: 1988495040}
+  - key: Pay_Double_Bar
+    text: {fileID: 215854618}
+  - key: Pay_Single_Bar
+    text: {fileID: 1020942369}
+  - key: Pay_Any_7
+    text: {fileID: 633746998}
+  - key: Pay_Any_Bar
+    text: {fileID: 1307534185}
+  - key: Pay_Any_Symbols
+    text: {fileID: 986635725}
   uiSprite:
   - key: Normal_Reel
     Sprite: {fileID: 21300000, guid: f25e506bb05fa4a989906844f8977e0e, type: 3}

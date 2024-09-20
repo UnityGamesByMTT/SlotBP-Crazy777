@@ -77,6 +77,7 @@ public class GameManager : MonoBehaviour
             InitialSetup();
             InitiateButtons();
             BetButtonAssignClick();
+            UpdateDescription();
             SetBetMultiplier();
             m_Bet_Buttons[0].Select();
             m_AudioController.InitialAudioSetup();
@@ -226,6 +227,18 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetText(m_Key.m_text_any_7).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[7]).ToString();
         m_UIManager.GetText(m_Key.m_text_any_bar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[8]).ToString();
         m_UIManager.GetText(m_Key.m_text_any).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * m_Multiplier_Bet[9]).ToString();
+    }
+
+    private void UpdateDescription()
+    {
+        m_UIManager.GetText(m_Key.m_text_pay_tripple_7).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_double_7).text = m_SocketManager.initUIData.paylines.symbols[2].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_single_7).text = m_SocketManager.initUIData.paylines.symbols[3].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_double_bar).text = m_SocketManager.initUIData.paylines.symbols[4].multiplier.ToString();
+        m_UIManager.GetText(m_Key.m_text_pay_single_bar).text = m_SocketManager.initUIData.paylines.symbols[5].multiplier.ToString();
+        //m_UIManager.GetText(m_Key.m_text_pay_any_7).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+        //m_UIManager.GetText(m_Key.m_text_pay_any_bar).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
+        //m_UIManager.GetText(m_Key.m_text_pay_any_symbols).text = m_SocketManager.initUIData.paylines.symbols[1].multiplier.ToString();
     }
 
     private void BetButtonAssignClick()
@@ -453,6 +466,7 @@ public class GameManager : MonoBehaviour
             InitialSetup();
             InitiateButtons();
             BetButtonAssignClick();
+            UpdateDescription();
             SetBetMultiplier();
             m_Bet_Buttons[0].Select();
             m_AudioController.InitialAudioSetup();
