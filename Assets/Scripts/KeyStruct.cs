@@ -47,6 +47,9 @@ public class KeyStruct
     internal string m_text_pay_any_7 = "Pay_Any_7";
     internal string m_text_pay_any_bar = "Pay_Any_Bar";
     internal string m_text_pay_any_symbols = "Pay_Any_Symbols";
+    internal string m_text_pay_x_description = "Pay_X_Description";
+    internal string m_text_pay_dollar_description = "Pay_Dollar_Description";
+    internal string m_text_pay_respin_description = "Pay_Respin_Description";
     #endregion
 
     #region ANIMATED_SPRITES_LIST_KEY
