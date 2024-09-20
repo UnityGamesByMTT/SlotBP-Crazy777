@@ -39,6 +39,14 @@ public class KeyStruct
     internal string m_text_any = "Any";
     internal string m_text_total_auto_spin = "TotalAutoSpin";
     internal string m_text_free_spin_count = "FreeSpinCount";
+    internal string m_text_pay_tripple_7 = "Pay_Tripple_7";
+    internal string m_text_pay_double_7 = "Pay_Double_7";
+    internal string m_text_pay_single_7 = "Pay_Single_7";
+    internal string m_text_pay_double_bar = "Pay_Double_Bar";
+    internal string m_text_pay_single_bar = "Pay_Single_Bar";
+    internal string m_text_pay_any_7 = "Pay_Any_7";
+    internal string m_text_pay_any_bar = "Pay_Any_Bar";
+    internal string m_text_pay_any_symbols = "Pay_Any_Symbols";
     #endregion
 
     #region ANIMATED_SPRITES_LIST_KEY
