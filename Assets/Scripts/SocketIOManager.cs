@@ -459,14 +459,6 @@ public class AbtLogo
     public string link { get; set; }
 }
 
-public class DefaultAmount
-{
-}
-
-public class Description
-{
-}
-
 public class GameData
 {
     public List<double> Bets { get; set; }
@@ -476,19 +468,11 @@ public class GameData
     public int freeSpinCount { get; set; }
 }
 
-public class IncreaseValue
-{
-}
-
 public class Message
 {
     public GameData GameData { get; set; }
     public UIData UIData { get; set; }
     public PlayerData PlayerData { get; set; }
-}
-
-public class Multiplier
-{
 }
 
 public class Paylines
@@ -515,11 +499,34 @@ public class Symbol
 {
     public int ID { get; set; }
     public string Name { get; set; }
-    public Multiplier multiplier { get; set; }
-    public DefaultAmount defaultAmount { get; set; }
-    public SymbolsCount symbolsCount { get; set; }
-    public IncreaseValue increaseValue { get; set; }
-    public Description description { get; set; }
+    public object multiplier { get; set; }
+    public object defaultAmount { get; set; }
+    public object symbolsCount { get; set; }
+    public object increaseValue { get; set; }
+    public object description { get; set; }
+    public object payout { get; set; }
+    public object mixedPayout { get; set; }
+    public object defaultPayout { get; set; }
+}
+
+public class Multiplier
+{
+}
+
+public class IncreaseValue
+{
+}
+
+public class DefaultAmount
+{
+}
+
+public class DefaultPayout
+{
+}
+
+public class Description
+{
 }
 
 public class SymbolsCount
