@@ -173,7 +173,7 @@ public class SlotBehaviour : MonoBehaviour
 
         m_UIManager.GetText(m_Key.m_text_balance_amount).text = SocketManager.playerdata.Balance.ToString();
 
-        currentBalance = double.Parse(SocketManager.playerdata.Balance);
+        currentBalance = SocketManager.playerdata.Balance;
         currentTotalBet = SocketManager.initialData.Bets[BetCounter] * Lines;
 
         CompareBalance();
@@ -428,7 +428,7 @@ public class SlotBehaviour : MonoBehaviour
             });
         }
 
-        currentBalance = double.Parse(SocketManager.playerdata.Balance);
+        currentBalance = SocketManager.playerdata.Balance;
 
         #region SPIN_DEMO_SIMULATION
         //HACK: For demo purposes: Custom result data (simulated results)
@@ -498,7 +498,7 @@ public class SlotBehaviour : MonoBehaviour
         KillAllTweens();
 
         m_UIManager.GetText(m_Key.m_text_win_amount).text = SocketManager.playerdata.currentWining.ToString("f2");
-        m_UIManager.GetText(m_Key.m_text_balance_amount).text = SocketManager.playerdata.Balance.ToString();
+        m_UIManager.GetText(m_Key.m_text_balance_amount).text = SocketManager.playerdata.Balance.ToString("f2");
 
         // TODO: Implement backend logic to check for bonus games and win popups
         CheckPopups = false; // Simulated: No popups for demo
@@ -582,6 +582,9 @@ public class SlotBehaviour : MonoBehaviour
                 }
             }
         }
+
+        Tempimages[Tempimages.Count - 1].slotImages[0].sprite = myImages[UnityEngine.Random.Range(6, myImages.Length - 1)];
+        Tempimages[Tempimages.Count - 1].slotImages[2].sprite = myImages[UnityEngine.Random.Range(6, myImages.Length - 1)];
 
         CheckWin(m_slot_values_mid);
     }
@@ -929,12 +932,6 @@ public class SlotBehaviour : MonoBehaviour
         {
             m_UIManager.GetGameObject(m_Key.m_object_bet_panel).SetActive(toggle);
         }
-    }
-
-    internal void updateBalance()
-    {
-        m_UIManager.GetText(m_Key.m_text_balance_amount).text = SocketManager.playerdata.Balance.ToString();
-        m_UIManager.GetText(m_Key.m_text_win_amount).text = SocketManager.playerdata.currentWining.ToString("f2");
     }
 
     private void StartGameAnimation(GameObject animObjects)

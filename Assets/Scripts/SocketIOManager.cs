@@ -33,13 +33,14 @@ public class SocketIOManager : MonoBehaviour
     private SocketManager manager;
 
     protected string SocketURI = null;
-    protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/";
+    protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
+    //protected string TestSocketURI = "https://7p68wzhv-5000.inc1.devtunnels.ms/"; //HACK: Personal Test Server Address
 
     [SerializeField]
     private string testToken;
     internal bool isResultdone = false;
 
-    protected string gameID = "SL-CRZ";   //SL-CRZ
+    protected string gameID = "SL-CRZ";
 
     internal bool isLoaded = false;
     internal bool SetInit = false;
@@ -482,7 +483,7 @@ public class Paylines
 
 public class PlayerData
 {
-    public string Balance { get; set; }
+    public double Balance { get; set; }
     public double haveWon { get; set; }
     public double currentWining { get; set; }
     public double totalbet { get; set; }
