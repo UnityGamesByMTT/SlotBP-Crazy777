@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
     #endregion
 
     [SerializeField] private Button[] m_Bet_Buttons;
+    [SerializeField] Transform m_InfoContentReference;
 
     private Coroutine M_Initial_Animation = null;
     private bool m_SettingsClicked = false;
@@ -145,7 +146,7 @@ public class GameManager : MonoBehaviour
         m_UIManager.GetButton(m_Key.m_button_music_exit).onClick.AddListener(delegate { ClosePopup("music"); m_AudioController.m_Click_Audio.Play(); });
 
         m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.RemoveAllListeners();
-        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ClosePopup("info"); m_AudioController.m_Click_Audio.Play(); });
+        m_UIManager.GetButton(m_Key.m_button_info_exit).onClick.AddListener(delegate { ClosePopup("info"); m_AudioController.m_Click_Audio.Play(); m_InfoContentReference.localPosition = new Vector3(0, 0, 0); });
 
         m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_auto_spin_setting_done).onClick.AddListener(delegate { AutoSpinSettingsConfig(); m_AudioController.m_Click_Audio.Play(); });
@@ -225,38 +226,45 @@ public class GameManager : MonoBehaviour
             switch (m_Cur_Symbol.Name.ToUpper())
             {
                 case ("777"):
-                    //Data Update In Upper Section
+                    //HACK: Data Update In Upper Section
                     m_UIManager.GetText(m_Key.m_text_tripple_7_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
+
                     m_UIManager.GetText(m_Key.m_text_any_7).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.mixedPayout.ToString())).ToString();
-                    //m_UIManager.GetText(m_Key.m_text_any).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * int.Parse(m_Cur_Symbol.defaultAmount.ToString())).ToString();
 
                     //Data Update In Paytable
-                    m_UIManager.GetText(m_Key.m_text_pay_tripple_7).text = "<color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
-                    m_UIManager.GetText(m_Key.m_text_pay_any_7).text = "Any <color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
-                    m_UIManager.GetText(m_Key.m_text_pay_any_symbols).text = "Any <color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_tripple_7).text = "<color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_any_7).text = "Any <color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_any_symbols).text = "Any <color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
                     break;
                 case ("77"):
-                    //Data Update In Upper Section
+                    //HACK: Data Update In Upper Section
                     m_UIManager.GetText(m_Key.m_text_double_7_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
 
                     //Data Update In Paytable
-                    m_UIManager.GetText(m_Key.m_text_pay_double_7).text = "<color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_double_7).text = "<color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
                     break;
                 case ("7"):
-                    //Data Update In Upper Section
+                    //HACK: Data Update In Upper Section
                     m_UIManager.GetText(m_Key.m_text_single_7_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
 
                     //Data Update In Paytable
-                    m_UIManager.GetText(m_Key.m_text_pay_single_7).text = "<color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_single_7).text = "<color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
                     break;
                 case ("BAR/BAR"):
+                    //HACK: Data Update In Upper Section
                     m_UIManager.GetText(m_Key.m_text_double_bar_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
+                    m_UIManager.GetText(m_Key.m_text_any_bar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.mixedPayout.ToString())).ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_any_bar).text = "<color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
+
+                    //Data Update In Paytable
+                    m_UIManager.GetText(m_Key.m_text_pay_double_bar).text = "<color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
                     break;
                 case ("BAR"):
+                    //HACK: Data Update In Upper Section
                     m_UIManager.GetText(m_Key.m_text_single_bar_combo).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
 
                     //Data Update In Paytable
-                    m_UIManager.GetText(m_Key.m_text_pay_single_bar).text = "<color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
+                    m_UIManager.GetText(m_Key.m_text_pay_single_bar).text = "<color=yellow>3X </color>" + m_Cur_Symbol.payout.ToString();
                     break;
                 case ("10X"):
                     m_UIManager.GetText(m_Key.m_text_pay_x_description).text = m_Cur_Symbol.description.ToString();
@@ -268,11 +276,8 @@ public class GameManager : MonoBehaviour
                 case ("DOUBLE+"):
                     //Data Update In Upper Section
                     m_UIManager.GetText(m_Key.m_text_double_dollar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
-                    //m_UIManager.GetText(m_Key.m_text_any_bar).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.mixedPayout.ToString())).ToString();
 
                     //Data Update In Paytable
-                    m_UIManager.GetText(m_Key.m_text_pay_double_bar).text = "<color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
-                    m_UIManager.GetText(m_Key.m_text_pay_any_bar).text = "Any <color=yellow>3X</color>" + m_Cur_Symbol.multiplier.ToString();
                     m_UIManager.GetText(m_Key.m_text_pay_dollar_description).text = m_Cur_Symbol.description.ToString();
                     break;
                 case ("ADD"):
@@ -281,6 +286,9 @@ public class GameManager : MonoBehaviour
                     break;
                 case ("RESPIN"):
                     m_UIManager.GetText(m_Key.m_text_pay_respin_description).text = m_Cur_Symbol.description.ToString();
+                    break;
+                default:
+                    m_UIManager.GetText(m_Key.m_text_any).text = (m_SocketManager.initialData.Bets[m_SlotBehaviour.BetCounter] * double.Parse(m_Cur_Symbol.payout.ToString())).ToString();
                     break;
             }
         }
