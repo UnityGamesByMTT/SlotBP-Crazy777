@@ -174,6 +174,9 @@ public class GameManager : MonoBehaviour
 
         m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_quit_no).onClick.AddListener(delegate { ClosePopup("quit"); m_AudioController.m_Click_Audio.Play(); });
+
+        m_UIManager.GetButton(m_Key.m_button_low_balance_quit).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_low_balance_quit).onClick.AddListener(delegate { OpenCloseLowBalancePopup(false); });
     }
 
     private IEnumerator InitialAnimation()
@@ -397,6 +400,18 @@ public class GameManager : MonoBehaviour
         OpenPopup("music");
     }
 
+    internal void OpenCloseLowBalancePopup(bool m_config)
+    {
+        if (m_config)
+        {
+            OpenPopup("low_balance");
+        }
+        else
+        {
+            ClosePopup("low_balance");
+        }
+    }
+
     private void AnimateInfoMusicButton()
     {
         m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
@@ -425,6 +440,9 @@ public class GameManager : MonoBehaviour
             case "music":
                 m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(false);
                 break;
+            case "low_balance":
+                m_UIManager.GetGameObject(m_Key.m_object_low_balance_popup).SetActive(false);
+                break;
             case "quit":
                 m_UIManager.GetGameObject(m_Key.m_object_quit_popup).SetActive(false);
                 break;
@@ -442,6 +460,9 @@ public class GameManager : MonoBehaviour
                 break;
             case "music":
                 m_UIManager.GetGameObject(m_Key.m_object_settings_popup).SetActive(true);
+                break;
+            case "low_balance":
+                m_UIManager.GetGameObject(m_Key.m_object_low_balance_popup).SetActive(true);
                 break;
             case "quit":
                 m_UIManager.GetGameObject(m_Key.m_object_quit_popup).SetActive(true);

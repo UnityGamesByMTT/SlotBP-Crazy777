@@ -5428,6 +5428,8 @@ MonoBehaviour:
     button: {fileID: 154746648}
   - key: Quit_No
     button: {fileID: 1256191164}
+  - key: Low_Balance_Quit
+    button: {fileID: 1047891047}
   uiInputField: []
   uiText:
   - key: '[[===GAME_BUTTON_PANEL===]]'
@@ -5542,6 +5544,8 @@ MonoBehaviour:
     gameObject: {fileID: 216916721}
   - key: FreeSpin_Panel
     gameObject: {fileID: 1194598081}
+  - key: LowBalance_Popup
+    gameObject: {fileID: 2019389224}
 --- !u!1 &348661920
 GameObject:
   m_ObjectHideFlags: 0
@@ -7048,7 +7052,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Balance is low !!!
+  m_text: Your Balance Is Low Please Rechearge To Continue...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -34161,7 +34165,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Disconnected
+  m_text: Low Balance
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -35687,7 +35691,7 @@ MonoBehaviour:
   slotManager: {fileID: 1021465155}
   uiManager: {fileID: 328257257}
   bonusdata: []
-  testToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDgzZDdkYTI3YmY5MDI0NDNlYjRkZSIsInVzZXJuYW1lIjoiZGFyc2hhbiIsInJvbGUiOiJwbGF5ZXIiLCJpYXQiOjE3MjY4OTUxODAsImV4cCI6MTcyNzQ5OTk4MH0.J14-uqO4uUahTgqCmKeuSsRusRssC_cBmk82np5WMhQ
+  testToken: 
 --- !u!1 &1740615999
 GameObject:
   m_ObjectHideFlags: 0

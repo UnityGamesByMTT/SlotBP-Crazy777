@@ -21,6 +21,7 @@ public class KeyStruct
     internal string m_button_game_exit = "Exit_Game";
     internal string m_button_quit_yes = "Quit_Yes";
     internal string m_button_quit_no = "Quit_No";
+    internal string m_button_low_balance_quit = "Low_Balance_Quit";
     #endregion
 
     #region TEXT_REFERENCES_KEY
@@ -96,5 +97,6 @@ public class KeyStruct
     internal string m_object_quit_popup = "Quit_Popup";
     internal string m_object_bet_panel = "Bet_Panel";
     internal string m_object_free_spin_panel = "FreeSpin_Panel";
+    internal string m_object_low_balance_popup = "LowBalance_Popup";
     #endregion
 }
