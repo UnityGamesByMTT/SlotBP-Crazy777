@@ -292,14 +292,15 @@ public class SlotBehaviour : MonoBehaviour
     {
         if (currentBalance < currentTotalBet)
         {
-            m_UIManager.GetButton(m_Key.m_button_auto_spin).interactable = false;
-            m_UIManager.GetButton(m_Key.m_button_spin).interactable = false;
+            m_GameManager.OpenCloseLowBalancePopup(true);
+            //m_UIManager.GetButton(m_Key.m_button_auto_spin).interactable = false;
+            //m_UIManager.GetButton(m_Key.m_button_spin).interactable = false;
         }
-        else
-        {
-            m_UIManager.GetButton(m_Key.m_button_auto_spin).interactable = true;
-            m_UIManager.GetButton(m_Key.m_button_spin).interactable = true;
-        }
+        //else
+        //{
+        //    m_UIManager.GetButton(m_Key.m_button_auto_spin).interactable = true;
+        //    m_UIManager.GetButton(m_Key.m_button_spin).interactable = true;
+        //}
     }
 
     internal void ChangeBet()
@@ -310,6 +311,8 @@ public class SlotBehaviour : MonoBehaviour
             //if (TotalBet_text) TotalBet_text.text = (SocketManager.initialData.Bets[BetCounter] * Lines).ToString(); // To Be Implemented
 
             currentTotalBet = SocketManager.initialData.Bets[BetCounter] * Lines;
+            Debug.Log(currentTotalBet);
+            Debug.Log(currentBalance);
             CompareBalance();
         }
     }
@@ -375,12 +378,19 @@ public class SlotBehaviour : MonoBehaviour
         m_UIManager.GetGameObject(m_Key.m_object_normal_win_line).SetActive(true);
         PlayWinLineAnimation(false);
 
+        currentBalance = SocketManager.playerdata.Balance;
+        currentTotalBet = SocketManager.initialData.Bets[BetCounter] * Lines;
+
+        Debug.Log("Current Balance: " + currentBalance.ToString());
+        Debug.Log("Current Bet: " + currentTotalBet.ToString());
+
         // Check if the player has enough balance to spin and if it's not a free spin
         if (currentBalance < currentTotalBet && !IsFreeSpin)
         {
             CompareBalance();
             StopAutoSpin();
             yield return new WaitForSeconds(1);
+            ToggleButtonGrp(true);
             yield break;
         }
 
@@ -420,15 +430,14 @@ public class SlotBehaviour : MonoBehaviour
         {
             double initAmount = balance;
             initAmount -= bet;
-
+            //m_UIManager.GetText(m_Key.m_text_balance_amount).text = initAmount.ToString("f2");
             // Tween the balance display to reflect the new balance
             DOTween.To(() => initAmount, (val) => initAmount = val, balance, 0.8f).OnUpdate(() =>
             {
-                m_UIManager.GetText(m_Key.m_text_balance_amount).text = initAmount.ToString("f2");
+                m_UIManager.GetText(m_Key.m_text_balance_amount).text = (initAmount - bet).ToString("f2");
             });
         }
 
-        currentBalance = SocketManager.playerdata.Balance;
 
         #region SPIN_DEMO_SIMULATION
         //HACK: For demo purposes: Custom result data (simulated results)
@@ -448,6 +457,7 @@ public class SlotBehaviour : MonoBehaviour
         simulatedResultReel.Clear();
         simulatedResultReel.TrimExcess();
         SocketManager.AccumulateResult(BetCounter);
+        currentBalance = SocketManager.playerdata.Balance;
         yield return new WaitUntil(() => SocketManager.isResultdone);
         foreach (var m in SocketManager.resultData.resultSymbols[1])
         {

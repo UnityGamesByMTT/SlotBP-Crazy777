@@ -33,8 +33,9 @@ public class SocketIOManager : MonoBehaviour
     private SocketManager manager;
 
     protected string SocketURI = null;
-    protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
-    //protected string TestSocketURI = "https://7p68wzhv-5000.inc1.devtunnels.ms/"; //HACK: Personal Test Server Address
+    //protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
+    protected string TestSocketURI = "https://7p68wzhv-5000.inc1.devtunnels.ms/"; //HACK: Personal Test Server Address
+    //protected string TestSocketURI = "https://jmn3wfcb-5000.inc1.devtunnels.ms/";
 
     [SerializeField]
     private string testToken;
@@ -313,7 +314,7 @@ public class SocketIOManager : MonoBehaviour
         message.data = new BetData();
         message.data.currentBet = currBet;
         message.data.spins = 1;
-        message.data.currentLines = 3;
+        message.data.currentLines = 1;
         message.id = "SPIN";
         // Serialize message data to JSON
         string json = JsonUtility.ToJson(message);
