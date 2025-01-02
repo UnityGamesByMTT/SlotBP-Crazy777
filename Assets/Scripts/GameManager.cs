@@ -177,6 +177,13 @@ public class GameManager : MonoBehaviour
 
         m_UIManager.GetButton(m_Key.m_button_low_balance_quit).onClick.RemoveAllListeners();
         m_UIManager.GetButton(m_Key.m_button_low_balance_quit).onClick.AddListener(delegate { OpenCloseLowBalancePopup(false); });
+
+        m_UIManager.GetButton(m_Key.m_button_stop_spin_button).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_stop_spin_button).onClick.AddListener(delegate
+        {
+            m_SlotBehaviour.StopSpinToggle = true;
+            m_UIManager.GetButton(m_Key.m_button_stop_spin_button).gameObject.SetActive(false);
+        });
     }
 
     private IEnumerator InitialAnimation()

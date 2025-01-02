@@ -22,6 +22,7 @@ public class KeyStruct
     internal string m_button_quit_yes = "Quit_Yes";
     internal string m_button_quit_no = "Quit_No";
     internal string m_button_low_balance_quit = "Low_Balance_Quit";
+    internal string m_button_stop_spin_button = "Stop_Spin_Button";
     #endregion
 
     #region TEXT_REFERENCES_KEY
