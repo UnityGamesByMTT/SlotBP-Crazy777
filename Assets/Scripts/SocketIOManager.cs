@@ -33,8 +33,8 @@ public class SocketIOManager : MonoBehaviour
     private SocketManager manager;
 
     protected string SocketURI = null;
-    protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
-    //protected string TestSocketURI = "http://localhost:5000";
+    //protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
+    protected string TestSocketURI = "http://localhost:5000";
 
     [SerializeField]
     private string testToken;

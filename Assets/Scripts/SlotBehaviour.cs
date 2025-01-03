@@ -162,7 +162,7 @@ public class SlotBehaviour : MonoBehaviour
     {
         m_GameManager.OnSpinClicked += delegate { StartSlots(); };// Subscribing the event for the slot spin is clicked.
         m_GameManager.OnBetButtonClicked += delegate { ChangeBet(); };// Subscribing the event for bet button clicked.
-        m_GameManager.OnAutoSpinClicked += delegate { AutoSpin(); m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString(); };// Subscribing the event for auto spin start
+        m_GameManager.OnAutoSpinClicked += delegate { AutoSpin(); /*m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString();*/ };// Subscribing the event for auto spin start
         m_GameManager.OnAutoSpinStopClicked += delegate { StopAutoSpin(); WasAutoSpinOn = false; };// Subscribing the event for auto spin stop.
     }
 
