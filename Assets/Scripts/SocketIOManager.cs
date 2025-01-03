@@ -33,15 +33,16 @@ public class SocketIOManager : MonoBehaviour
     private SocketManager manager;
 
     protected string SocketURI = null;
-    //protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
-    protected string TestSocketURI = "https://7p68wzhv-5000.inc1.devtunnels.ms/"; //HACK: Personal Test Server Address
-    //protected string TestSocketURI = "https://jmn3wfcb-5000.inc1.devtunnels.ms/";
+    protected string TestSocketURI = "https://game-crm-rtp-backend.onrender.com/"; //HACK: Professional / Dev Server Address
+    //protected string TestSocketURI = "http://localhost:5000";
 
     [SerializeField]
     private string testToken;
     internal bool isResultdone = false;
 
     protected string gameID = "SL-CRZ";
+    //protected string gameID = "";
+    //protected string gameID = "";
 
     internal bool isLoaded = false;
     internal bool SetInit = false;

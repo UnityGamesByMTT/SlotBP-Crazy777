@@ -81,12 +81,16 @@ public class SlotBehaviour : MonoBehaviour
     private bool IsSpinning = false;
     internal bool CheckPopups = false;
     internal bool WinLine = false;
+    internal bool StopSpinToggle;
+    private bool IsTurboOn;
+    [SerializeField] private bool WasAutoSpinOn;
     #endregion
 
     #region Numbers
     [Header("Numbers Ref")]
     [SerializeField]
     internal int BetCounter = 0;
+    private float SpinDelay = 0.2f;
     private double currentBalance = 0;
     private double currentTotalBet = 0;
     int Lines = 3;
@@ -124,6 +128,7 @@ public class SlotBehaviour : MonoBehaviour
     private Transform m_SpeedMarch_Bonus;
 
     private Tweener m_SpeedMarch_Bonus_Tween;
+    private Tween BalanceTween;
     #endregion
 
     [SerializeField]
@@ -158,7 +163,7 @@ public class SlotBehaviour : MonoBehaviour
         m_GameManager.OnSpinClicked += delegate { StartSlots(); };// Subscribing the event for the slot spin is clicked.
         m_GameManager.OnBetButtonClicked += delegate { ChangeBet(); };// Subscribing the event for bet button clicked.
         m_GameManager.OnAutoSpinClicked += delegate { AutoSpin(); m_Auto_Spin_Count.text = m_GameManager.AutoSpin_Count.ToString(); };// Subscribing the event for auto spin start
-        m_GameManager.OnAutoSpinStopClicked += delegate { StopAutoSpin(); };// Subscribing the event for auto spin stop.
+        m_GameManager.OnAutoSpinStopClicked += delegate { StopAutoSpin(); WasAutoSpinOn = false; };// Subscribing the event for auto spin stop.
     }
 
     internal void SetInitialUI()
@@ -265,6 +270,8 @@ public class SlotBehaviour : MonoBehaviour
             StartSlots(IsAutoSpin);
             yield return tweenroutine;
         }
+
+        //WasAutoSpinOn = false;
     }
 
     private IEnumerator StopAutoSpinCoroutine()
@@ -351,14 +358,22 @@ public class SlotBehaviour : MonoBehaviour
         while (i < spinchances)
         {
             Debug.Log(string.Concat("<color=green><i>", "Free Spin Executing...", "</i></color>"));
-            StartSlots(IsAutoSpin);
+            StartSlots();
             yield return tweenroutine;
+            yield return new WaitForSeconds(SpinDelay);
             Debug.Log(string.Concat("<color=yellow><b>", i, " : ", "</b></color>"));
             i++;
         }
+        if (WasAutoSpinOn)
+        {
+            AutoSpin();
+        }
+        else
+        {
+            ToggleButtonGrp(true);
+        }
         IsFreeSpin = false;
         m_GameManager.InvokeFreeSpinEnd();
-        ToggleButtonGrp(true);
         if (m_FreeSpinAnimation) m_FreeSpinAnimation.StopAnimation();
         m_FreeSpinAnimation = null; // Code Line For Cross Check
     }
@@ -404,6 +419,12 @@ public class SlotBehaviour : MonoBehaviour
         IsSpinning = true;
         ToggleButtonGrp(false);
 
+        //HACK: Modification For Turbo
+        if (!m_GameManager.TurboSpin && !IsFreeSpin && !IsAutoSpin)
+        {
+            m_UIManager.GetButton(m_Key.m_button_stop_spin_button).gameObject.SetActive(true);
+        }
+
         // Initialize tweening for each slot with a small delay between them
         for (int i = 0; i < numberOfSlots; i++)
         {
@@ -432,7 +453,7 @@ public class SlotBehaviour : MonoBehaviour
             initAmount -= bet;
             //m_UIManager.GetText(m_Key.m_text_balance_amount).text = initAmount.ToString("f2");
             // Tween the balance display to reflect the new balance
-            DOTween.To(() => initAmount, (val) => initAmount = val, balance, 0.8f).OnUpdate(() =>
+            BalanceTween = DOTween.To(() => initAmount, (val) => initAmount = val, balance, 0.8f).OnUpdate(() =>
             {
                 m_UIManager.GetText(m_Key.m_text_balance_amount).text = (initAmount - bet).ToString("f2");
             });
@@ -470,32 +491,51 @@ public class SlotBehaviour : MonoBehaviour
         #endregion
 
         //HACK: Code for the delay between the start and stop tweening routines
-        if (m_GameManager.TurboSpin)
+        //if (m_GameManager.TurboSpin)
+        //{
+        //    yield return new WaitForSeconds(0f);
+        //}
+        //else
+        //{
+        //    yield return new WaitForSeconds(0.5f);
+        //}
+
+        if (m_GameManager.TurboSpin || IsFreeSpin)
         {
-            yield return new WaitForSeconds(0f);
+            yield return new WaitForSeconds(0.1f);
         }
         else
         {
-            yield return new WaitForSeconds(0.5f);
+            for (int i = 0; i < 10; i++)
+            {
+                yield return new WaitForSeconds(0.1f);
+                if (StopSpinToggle)
+                {
+                    break;
+                }
+            }
+            m_UIManager.GetButton(m_Key.m_button_stop_spin_button).gameObject.SetActive(false);
         }
 
         // Stop all tweens running for each slot
         for (int i = 0; i < numberOfSlots - 1; i++)
         {
-            yield return StopTweening(5, Slot_Transform[i], i, simulatedResultReel[i] != 0 ? 0 : m_GameManager.StopPos_Plus);
+            yield return StopTweening(5, Slot_Transform[i], i, simulatedResultReel[i] != 0 ? 0 : m_GameManager.StopPos_Plus, StopSpinToggle);
         }
         if (!IsFreeSpin)
         {
             if (m_Bonus_Found && !m_GameManager.TurboSpin)
             {
                 yield return new WaitForSeconds(0.5f);
-                yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
+                yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus, StopSpinToggle);
             }
             else
             {
-                yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus);
+                yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus, StopSpinToggle);
             }
         }
+
+        StopSpinToggle = false;
 
         StartSlotAnimations();
 
@@ -505,13 +545,26 @@ public class SlotBehaviour : MonoBehaviour
         // TODO: Implement backend logic to check payout line and jackpots
 
         // Kill all active tweens to ensure no lingering animations
+
+        yield return alltweens[^1].WaitForCompletion();
         KillAllTweens();
+
+        if (SocketManager.playerdata.currentWining > 0)
+        {
+            SpinDelay = 1.2f;
+        }
+        else
+        {
+            SpinDelay = 0.2f;
+        }
 
         m_UIManager.GetText(m_Key.m_text_win_amount).text = SocketManager.playerdata.currentWining.ToString("f2");
         m_UIManager.GetText(m_Key.m_text_balance_amount).text = SocketManager.playerdata.Balance.ToString("f2");
 
         // TODO: Implement backend logic to check for bonus games and win popups
         CheckPopups = false; // Simulated: No popups for demo
+
+        BalanceTween?.Kill();
 
         // Wait until all popups are dismissed
         yield return new WaitUntil(() => !CheckPopups);
@@ -551,6 +604,8 @@ public class SlotBehaviour : MonoBehaviour
         {
             if (IsAutoSpin)
             {
+                WasAutoSpinOn = true;
+                Debug.Log($"<color=red>Free Spin In Auto Spin {WasAutoSpinOn}</color>");
                 StopAutoSpin();
             }
             try
@@ -652,10 +707,10 @@ public class SlotBehaviour : MonoBehaviour
 
                 //Make the last slot to be speed and run for little more time
                 m_Speed_Control = 0.1f;
-                if (!IsFreeSpin)
-                {
-                    InitializeBonusTweening(m_SpeedMarch_Bonus);
-                }
+                //if (!IsFreeSpin)
+                //{
+                //    InitializeBonusTweening(m_SpeedMarch_Bonus);
+                //}
             }
 
             PlaySpriteAnimation(true, result_reel, audioController.m_Bonus_Audio);
@@ -995,48 +1050,68 @@ public class SlotBehaviour : MonoBehaviour
         alltweens.Add(tweener);
     }
 
-    private IEnumerator StopTweening(int reqpos, Transform slotTransform, int index, int m_StopPos)
+    private IEnumerator StopTweening(int reqpos, Transform slotTransform, int index, int m_StopPos, bool stopImmediately)
     {
         bool IsRegister = false;
+
+        // Wait for the tween to register completion callback
         yield return alltweens[index].OnStepComplete(delegate { IsRegister = true; });
+
+        // Wait until the step completes
         yield return new WaitUntil(() => IsRegister);
-        alltweens[index].Kill();
-        //alltweens[index].Pause();
-        int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor)) - 20;
+
+        if (stopImmediately)
+        {
+            // Move the transform to its final position instantly to simulate completion
+            int tweenpos = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor)) - 20;
+            float finalYPosition = -tweenpos + (100 + m_StopPos) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0);
+            slotTransform.localPosition = new Vector3(slotTransform.localPosition.x, finalYPosition, slotTransform.localPosition.z);
+
+            // Kill the tween to stop it completely
+            alltweens[index]?.Kill();
+            yield break;
+        }
+
+        alltweens[index]?.Kill();
+
+        int tweenpos1 = (reqpos * (IconSizeFactor + SpaceFactor)) - (IconSizeFactor + (2 * SpaceFactor)) - 20;
+
         if (m_GameManager.TurboSpin)
         {
-            alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.3f).SetEase(Ease.OutQuad);
+            alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos1 + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.3f).SetEase(Ease.OutQuad);
         }
         else
         {
-            alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.5f).SetEase(Ease.OutQuad);
-            //Debug.Log((tweenpos - (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0));
+            alltweens[index] = slotTransform.DOLocalMoveY((-tweenpos1 + (100 + m_StopPos)) + (SpaceFactor > 0 ? SpaceFactor / 4 : 0), 0.5f).SetEase(Ease.OutQuad);
         }
-        //yield return new WaitForSeconds(0.5f);
+
+        // Wait for the tween to complete
         yield return alltweens[index].WaitForCompletion();
-        alltweens[index].Kill();
-        StopBonusTweening();
+        alltweens[index]?.Kill();
+        //StopBonusTweening();
     }
+
+
 
     #region Bonus Tweening
-    private void InitializeBonusTweening(Transform slotTransform)
-    {
-        m_BonusSlot_Ref.gameObject.SetActive(false);
-        m_SpeedMarch_Bonus.gameObject.SetActive(true);
+    //private void InitializeBonusTweening(Transform slotTransform)
+    //{
+    //    m_BonusSlot_Ref.gameObject.SetActive(false);
+    //    m_SpeedMarch_Bonus.gameObject.SetActive(true);
 
-        slotTransform.localPosition = new Vector2(slotTransform.localPosition.x, 0);
-        Tweener tweener;
-        tweener = slotTransform.DOLocalMoveY(tweenHeight, 0.2f).SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear).SetDelay(0);
-        tweener.Play();
-        m_SpeedMarch_Bonus_Tween = tweener;
-    }
+    //    slotTransform.localPosition = new Vector2(slotTransform.localPosition.x, 0);
+    //    Tweener tweener;
+    //    tweener = slotTransform.DOLocalMoveY(tweenHeight, 0.2f).SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear).SetDelay(0);
+    //    tweener.Play();
+    //    m_SpeedMarch_Bonus_Tween = tweener;
+    //}
 
-    private void StopBonusTweening()
-    {
-        m_SpeedMarch_Bonus_Tween.Kill();
-        m_BonusSlot_Ref.gameObject.SetActive(true);
-        m_SpeedMarch_Bonus.gameObject.SetActive(false);
-    }
+    //private void StopBonusTweening()
+    //{
+    //    m_SpeedMarch_Bonus_Tween.Kill();
+    //    m_BonusSlot_Ref.gameObject.SetActive(true);
+    //    m_SpeedMarch_Bonus.gameObject.SetActive(false);
+    //}
     #endregion
 
     private void KillAllTweens()
