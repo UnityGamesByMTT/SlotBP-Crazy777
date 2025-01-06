@@ -506,7 +506,7 @@ public class SlotBehaviour : MonoBehaviour
         }
         else
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 yield return new WaitForSeconds(0.1f);
                 if (StopSpinToggle)
@@ -526,7 +526,7 @@ public class SlotBehaviour : MonoBehaviour
         {
             if (m_Bonus_Found && !m_GameManager.TurboSpin)
             {
-                yield return new WaitForSeconds(0.5f);
+                //yield return new WaitForSeconds(0.5f);
                 yield return StopTweening(5, Slot_Transform[numberOfSlots - 1], numberOfSlots - 1, simulatedResultReel[simulatedResultReel.Count - 1] != 0 ? 0 : m_GameManager.StopPos_Plus, StopSpinToggle);
             }
             else
@@ -539,7 +539,7 @@ public class SlotBehaviour : MonoBehaviour
 
         StartSlotAnimations();
 
-        yield return new WaitForSeconds(0.3f);
+        //yield return new WaitForSeconds(0.3f);
 
         // Optional: Logic to check payout line (To be implemented with backend data)
         // TODO: Implement backend logic to check payout line and jackpots
