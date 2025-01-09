@@ -183,6 +183,7 @@ public class GameManager : MonoBehaviour
         {
             m_SlotBehaviour.StopSpinToggle = true;
             m_UIManager.GetButton(m_Key.m_button_stop_spin_button).gameObject.SetActive(false);
+            m_AudioController.m_Click_Audio.Play();
         });
     }
 
@@ -363,11 +364,11 @@ public class GameManager : MonoBehaviour
     {
         if (m_SettingsClicked)
         {
-            DeanimateInfoMusicButton();
+            //DeanimateInfoMusicButton();
         }
         else
         {
-            AnimateInfoMusicButton();
+            //AnimateInfoMusicButton();
         }
     }
 
@@ -397,13 +398,13 @@ public class GameManager : MonoBehaviour
 
     private void OnInfoButtonClicked()
     {
-        DeanimateInfoMusicButton();
+        //DeanimateInfoMusicButton();
         OpenPopup("info");
     }
 
     private void OnSettingButtonClicked()
     {
-        DeanimateInfoMusicButton();
+        //DeanimateInfoMusicButton();
         OpenPopup("music");
     }
 
@@ -419,23 +420,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void AnimateInfoMusicButton()
-    {
-        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
-        //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
-        m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(50f, 0.2f);
+    //private void AnimateInfoMusicButton()
+    //{
+    //    m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+    //    //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(100f, 0.2f);
+    //    m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(50f, 0.2f);
 
-        m_SettingsClicked = !m_SettingsClicked;
-    }
+    //    m_SettingsClicked = !m_SettingsClicked;
+    //}
 
-    private void DeanimateInfoMusicButton()
-    {
-        m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
-        //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
-        m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(-15f, 0.2f);
+    //private void DeanimateInfoMusicButton()
+    //{
+    //    m_UIManager.GetButton(m_Key.m_button_info).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+    //    //m_UIManager.GetButton(m_Key.m_button_music).GetComponent<RectTransform>().DOLocalMoveY(-15f, 0.2f);
+    //    m_UIManager.GetGameObject(m_Key.m_object_music_button_holder).transform.DOLocalMoveY(-15f, 0.2f);
 
-        m_SettingsClicked = !m_SettingsClicked;
-    }
+    //    m_SettingsClicked = !m_SettingsClicked;
+    //}
 
     private void ClosePopup(string m_Config_String)
     {
