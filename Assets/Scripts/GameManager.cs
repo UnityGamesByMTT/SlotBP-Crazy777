@@ -57,6 +57,8 @@ public class GameManager : MonoBehaviour
 
     private Coroutine M_Initial_Animation = null;
     private bool m_SettingsClicked = false;
+    [SerializeField]
+    private SocketIOManager _socketIoManager;
 
     private KeyStruct m_Key;
 
@@ -185,6 +187,10 @@ public class GameManager : MonoBehaviour
             m_UIManager.GetButton(m_Key.m_button_stop_spin_button).gameObject.SetActive(false);
             m_AudioController.m_Click_Audio.Play();
         });
+
+        Debug.Log(m_UIManager.GetButton(m_Key.m_button_close_Disconnect));
+        m_UIManager.GetButton(m_Key.m_button_close_Disconnect).onClick.RemoveAllListeners();
+        m_UIManager.GetButton(m_Key.m_button_close_Disconnect).onClick.AddListener(delegate { CallOnExitFunction(); m_AudioController.m_Click_Audio.Play(); _socketIoManager.ReactNativeCallOnFailedToConnect(); });
     }
 
     private IEnumerator InitialAnimation()
